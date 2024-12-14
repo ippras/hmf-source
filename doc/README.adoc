@@ -1,0 +1,7 @@
+C10:0    |C12:0    |C14:0    |C16:0      |C16:1,n-7|C18:0    |C18:1,n-9  |C18:2,n-6
+0.52-1.64|1.23-6.41|1.20-5.29|17.02-24.39|1.12-3.47|3.89-7.37|28.50-42.37|16.58-27.29
+
+FA:: Fatty acid
+IQR:: Interquartile range
+P:: P-value, significant difference
+RR:: Reference range

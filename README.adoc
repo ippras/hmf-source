@@ -1,0 +1,33 @@
+= HMF
+
+Human Milk Fat
+
+* G1 (fatty acid of TAG)
+* G2 (fatty acid at the sn-2 position)
+
+* Bi - TAG (wt%)
+* Di - TAG mean
+
+* Bi(sn-2) - MAG2
+* Di(sn-2) MAG2 mean
+
+B = 0.24
+
+Ci = (Bi - Ai) / Ai
+C = (0.24 - A) / A = 0.54
+(1.64 - 1.66)/1.66=-0.012048192771084337349
+
+a = if B < A.start {
+    A.start
+} else B > A.end {
+    A.end
+} else {
+    B
+};
+
+When B is higher than the upper limit of the corresponding fatty acid content, A was selected as the upper limit of the range.
+If B was lower than the lower limit of the range, the lower limit was given as A.
+If the values of B were within the range, floating rate (C) was kept at zero.
+
+* https:oi.org/10.1016/j.algal.2018.11.004
+* https:oi.org/10.1021/jf903048p
