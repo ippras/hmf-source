@@ -2,7 +2,10 @@ use self::{
     panes::{behavior::Behavior, Pane},
     windows::About,
 };
-use crate::localization::{localize, UiExt};
+use crate::{
+    localization::{localize, UiExt},
+    presets::{HMF1, HMF2, HMF3},
+};
 use eframe::{get_value, set_value, CreationContext, Storage, APP_KEY};
 use egui::{
     menu::bar, vec2, warn_if_debug_build, Align, Align2, CentralPanel, Color32, Context,
@@ -14,8 +17,8 @@ use egui_notify::Toasts;
 use egui_phosphor::{
     add_to_fonts,
     regular::{
-        ARROWS_CLOCKWISE, GRID_FOUR, INFO, PLUS, SQUARE_SPLIT_HORIZONTAL, SQUARE_SPLIT_VERTICAL,
-        TABS, TRASH,
+        ARROWS_CLOCKWISE, DATABASE, GRID_FOUR, INFO, PLUS, SQUARE_SPLIT_HORIZONTAL,
+        SQUARE_SPLIT_VERTICAL, TABS, TRASH,
     },
     Variant,
 };
@@ -230,6 +233,46 @@ impl App {
                     if ui.button(RichText::new(PLUS).size(SIZE)).clicked() {
                         self.tree.insert_pane(Pane::new());
                     }
+                    // Load
+                    ui.menu_button(RichText::new(DATABASE).size(SIZE), |ui| {
+                        if ui
+                            .button(RichText::new(format!("{DATABASE} HMF-1")).heading())
+                            .clicked()
+                        {
+                            self.tree.insert_pane(Pane {
+                                data_frame: HMF1.clone(),
+                                control: Control::with_settings(
+                                    Settings::default().with_label("HMF-1".to_owned()),
+                                ),
+                            });
+                            ui.close_menu();
+                        }
+                        if ui
+                            .button(RichText::new(format!("{DATABASE} HMF-2")).heading())
+                            .clicked()
+                        {
+                            self.tree.insert_pane(Pane {
+                                data_frame: HMF2.clone(),
+                                control: Control::with_settings(
+                                    Settings::default().with_label("HMF-2".to_owned()),
+                                ),
+                            });
+                            ui.close_menu();
+                        }
+                        if ui
+                            .button(RichText::new(format!("{DATABASE} HMF-3")).heading())
+                            .clicked()
+                        {
+                            self.tree.insert_pane(Pane {
+                                data_frame: HMF3.clone(),
+                                control: Control::with_settings(
+                                    Settings::default().with_label("HMF-3".to_owned()),
+                                ),
+                            });
+                            ui.close_menu();
+                        }
+                    });
+                    ui.separator();
                     // About
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                         // About
