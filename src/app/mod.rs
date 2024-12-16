@@ -4,7 +4,7 @@ use self::{
 };
 use crate::{
     localization::{localize, UiExt},
-    presets::{HMF1, HMF2, HMF3, HMF4},
+    presets::{C70_CONTROL, CP_9, CV_15, CV_395, CZ_30412, HMF_1, HMF_2, HMF_3, HMF_4, ISO_FJ},
 };
 use eframe::{get_value, set_value, CreationContext, Storage, APP_KEY};
 use egui::{
@@ -239,28 +239,75 @@ impl App {
                             .button(RichText::new(format!("{DATABASE} HMF-1")).heading())
                             .clicked()
                         {
-                            self.tree.insert_pane(Pane::init(HMF1.clone(), "HMF-1"));
+                            self.tree.insert_pane(Pane::init(HMF_1.clone(), "HMF-1"));
                             ui.close_menu();
                         }
                         if ui
                             .button(RichText::new(format!("{DATABASE} HMF-2")).heading())
                             .clicked()
                         {
-                            self.tree.insert_pane(Pane::init(HMF2.clone(), "HMF-2"));
+                            self.tree.insert_pane(Pane::init(HMF_2.clone(), "HMF-2"));
                             ui.close_menu();
                         }
                         if ui
                             .button(RichText::new(format!("{DATABASE} HMF-3")).heading())
                             .clicked()
                         {
-                            self.tree.insert_pane(Pane::init(HMF3.clone(), "HMF-3"));
+                            self.tree.insert_pane(Pane::init(HMF_3.clone(), "HMF-3"));
                             ui.close_menu();
                         }
                         if ui
                             .button(RichText::new(format!("{DATABASE} HMF-4")).heading())
                             .clicked()
                         {
-                            self.tree.insert_pane(Pane::init(HMF4.clone(), "HMF-4"));
+                            self.tree.insert_pane(Pane::init(HMF_4.clone(), "HMF-4"));
+                            ui.close_menu();
+                        }
+                        ui.separator();
+                        if ui
+                            .button(RichText::new(format!("{DATABASE} CV-15")).heading())
+                            .clicked()
+                        {
+                            self.tree.insert_pane(Pane::init(CV_15.clone(), "CV-15"));
+                            ui.close_menu();
+                        }
+                        if ui
+                            .button(RichText::new(format!("{DATABASE} CZ-30412")).heading())
+                            .clicked()
+                        {
+                            self.tree
+                                .insert_pane(Pane::init(CZ_30412.clone(), "CZ-30412"));
+                            ui.close_menu();
+                        }
+                        if ui
+                            .button(RichText::new(format!("{DATABASE} CP-9")).heading())
+                            .clicked()
+                        {
+                            self.tree.insert_pane(Pane::init(CP_9.clone(), "CP-9"));
+                            ui.close_menu();
+                        }
+                        if ui
+                            .button(RichText::new(format!("{DATABASE} CV-395")).heading())
+                            .clicked()
+                        {
+                            self.tree.insert_pane(Pane::init(CV_395.clone(), "CV-395"));
+                            ui.close_menu();
+                        }
+                        //
+                        if ui
+                            .button(RichText::new(format!("{DATABASE} ISO-FJ")).heading())
+                            .clicked()
+                        {
+                            self.tree.insert_pane(Pane::init(ISO_FJ.clone(), "ISO-FJ"));
+                            ui.close_menu();
+                        }
+                        ui.separator();
+                        if ui
+                            .button(RichText::new(format!("{DATABASE} C70-CONTROL")).heading())
+                            .clicked()
+                        {
+                            self.tree
+                                .insert_pane(Pane::init(C70_CONTROL.clone(), "C70-CONTROL"));
                             ui.close_menu();
                         }
                     });
