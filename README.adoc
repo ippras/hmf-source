@@ -29,5 +29,10 @@ When B is higher than the upper limit of the corresponding fatty acid content, A
 If B was lower than the lower limit of the range, the lower limit was given as A.
 If the values of B were within the range, floating rate (C) was kept at zero.
 
+FA:: Fatty acid
+IQR:: Interquartile range
+P:: P-value, significant difference
+RR:: Reference range
+
 * https:oi.org/10.1016/j.algal.2018.11.004
 * https:oi.org/10.1021/jf903048p
