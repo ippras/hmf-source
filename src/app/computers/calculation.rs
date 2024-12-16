@@ -30,7 +30,7 @@ impl Computer {
                 .with_columns([
                     as_struct(vec![col("Carbons"), col("Unsaturated")]).alias("FattyAcid")
                 ]);
-            // SN123
+            // SN123 A B D
             lazy_frame = lazy_frame.with_columns([
                 col("StereospecificNumber123")
                     .struct_()
@@ -42,7 +42,7 @@ impl Computer {
                     .field_by_name("Median")
                     .alias("D"),
             ]);
-            lazy_frame = calculate(lazy_frame);
+            lazy_frame = calculate(lazy_frame, key.settings);
             lazy_frame = lazy_frame.with_columns([as_struct(vec![
                 col("A"),
                 col("B"),
@@ -54,7 +54,7 @@ impl Computer {
             .alias("SN123")]);
             lazy_frame =
                 lazy_frame.drop([col("A"), col("B"), col("C"), col("D"), col("E"), col("F")]);
-            // SN2
+            // SN2 A B D
             lazy_frame = lazy_frame.with_columns([
                 col("StereospecificNumber2")
                     .struct_()
@@ -66,7 +66,7 @@ impl Computer {
                     .field_by_name("Median")
                     .alias("D"),
             ]);
-            lazy_frame = calculate(lazy_frame);
+            lazy_frame = calculate(lazy_frame, key.settings);
             lazy_frame = lazy_frame.with_columns([as_struct(vec![
                 col("A"),
                 col("B"),
@@ -89,7 +89,7 @@ impl Computer {
     }
 }
 
-fn calculate(mut lazy_frame: LazyFrame) -> LazyFrame {
+fn calculate(mut lazy_frame: LazyFrame, settings: &Settings) -> LazyFrame {
     // A
     lazy_frame =
         lazy_frame.with_columns([when(col("B").lt(col("A").struct_().field_by_name("Min")))
@@ -102,6 +102,10 @@ fn calculate(mut lazy_frame: LazyFrame) -> LazyFrame {
     lazy_frame = lazy_frame.with_columns([((col("B") - col("A")).abs() / col("A"))
         .fill_nan(lit(0))
         .alias("C")]);
+    if settings.round > 0 {
+        lazy_frame = lazy_frame.with_column(col("C").round(settings.round));
+    }
+    lazy_frame = lazy_frame.with_columns([(col("C") * col("D") / col("D").sum()).alias("1")]);
     // E
     lazy_frame =
         lazy_frame.with_columns([(lit(50) * col("C") * col("D") / col("D").sum()).alias("E")]);

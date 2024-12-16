@@ -1,4 +1,7 @@
-use self::control::Control;
+use self::{
+    control::{Control, Settings},
+    table::TableView,
+};
 use crate::localization::localize;
 use anyhow::Result;
 use egui::{menu::bar, RichText, ScrollArea, TextEdit, Ui};
@@ -6,7 +9,6 @@ use egui_phosphor::regular::{ARROWS_HORIZONTAL, FLOPPY_DISK, GEAR, PENCIL, PLUS,
 use polars::prelude::*;
 use ron::{extensions::Extensions, ser::PrettyConfig};
 use serde::{Deserialize, Serialize};
-use table::TableView;
 use tracing::error;
 
 /// Configuration pane
@@ -21,6 +23,19 @@ impl Pane {
         Self {
             data_frame: DataFrame::empty(),
             control: Control::new(),
+        }
+    }
+
+    pub(crate) fn init(data_frame: DataFrame, label: impl Into<String>) -> Self {
+        Self {
+            data_frame,
+            control: Control {
+                settings: Settings {
+                    label: label.into(),
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
         }
     }
 

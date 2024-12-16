@@ -1,13 +1,12 @@
 use crate::{app::MAX_PRECISION, localization::localize};
-use egui::{Grid, Slider, Ui, Window};
+use egui::{DragValue, Grid, Slider, Ui, Widget, Window};
 use egui_phosphor::regular::GEAR;
 use serde::{Deserialize, Serialize};
 
-/// Configuration control
+/// Calculation control
 #[derive(Default, Deserialize, Serialize)]
 pub(crate) struct Control {
     pub(crate) settings: Settings,
-    pub(crate) index: usize,
     pub(crate) open: bool,
 }
 
@@ -15,17 +14,16 @@ impl Control {
     pub(crate) const fn new() -> Self {
         Self {
             settings: Settings::new(),
-            index: 0,
             open: false,
         }
     }
 
-    pub(crate) fn with_settings(settings: Settings) -> Self {
-        Self {
-            settings,
-            ..Self::new()
-        }
-    }
+    // pub(crate) fn with_settings(settings: Settings) -> Self {
+    //     Self {
+    //         settings,
+    //         ..Self::new()
+    //     }
+    // }
 
     pub(crate) fn windows(&mut self, ui: &mut Ui) {
         Window::new(format!("{GEAR} Configuration settings"))
@@ -45,6 +43,7 @@ pub(crate) struct Settings {
     pub(crate) editable: bool,
     pub(crate) label: String,
     pub(crate) precision: usize,
+    pub(crate) round: u32,
     pub(crate) sticky: usize,
     pub(crate) truncate: bool,
 
@@ -59,15 +58,12 @@ impl Settings {
             editable: false,
             label: String::new(),
             precision: 2,
+            round: 0,
             sticky: 0,
             truncate: false,
             names: true,
             properties: true,
         }
-    }
-
-    pub(crate) fn with_label(self, label: String) -> Self {
-        Self { label, ..self }
     }
 
     pub(crate) fn ui(&mut self, ui: &mut Ui) {
@@ -79,6 +75,12 @@ impl Settings {
 
             ui.separator();
             ui.separator();
+            ui.end_row();
+
+            // Round
+            ui.label(localize!("round"));
+            ui.add(Slider::new(&mut self.round, 0..=MAX_PRECISION as _))
+                .on_hover_text(localize!("round_description"));
             ui.end_row();
 
             // Properties

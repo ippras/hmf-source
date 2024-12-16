@@ -4,7 +4,7 @@ use self::{
 };
 use crate::{
     localization::{localize, UiExt},
-    presets::{HMF1, HMF2, HMF3},
+    presets::{HMF1, HMF2, HMF3, HMF4},
 };
 use eframe::{get_value, set_value, CreationContext, Storage, APP_KEY};
 use egui::{
@@ -239,36 +239,28 @@ impl App {
                             .button(RichText::new(format!("{DATABASE} HMF-1")).heading())
                             .clicked()
                         {
-                            self.tree.insert_pane(Pane {
-                                data_frame: HMF1.clone(),
-                                control: Control::with_settings(
-                                    Settings::default().with_label("HMF-1".to_owned()),
-                                ),
-                            });
+                            self.tree.insert_pane(Pane::init(HMF1.clone(), "HMF-1"));
                             ui.close_menu();
                         }
                         if ui
                             .button(RichText::new(format!("{DATABASE} HMF-2")).heading())
                             .clicked()
                         {
-                            self.tree.insert_pane(Pane {
-                                data_frame: HMF2.clone(),
-                                control: Control::with_settings(
-                                    Settings::default().with_label("HMF-2".to_owned()),
-                                ),
-                            });
+                            self.tree.insert_pane(Pane::init(HMF2.clone(), "HMF-2"));
                             ui.close_menu();
                         }
                         if ui
                             .button(RichText::new(format!("{DATABASE} HMF-3")).heading())
                             .clicked()
                         {
-                            self.tree.insert_pane(Pane {
-                                data_frame: HMF3.clone(),
-                                control: Control::with_settings(
-                                    Settings::default().with_label("HMF-3".to_owned()),
-                                ),
-                            });
+                            self.tree.insert_pane(Pane::init(HMF3.clone(), "HMF-3"));
+                            ui.close_menu();
+                        }
+                        if ui
+                            .button(RichText::new(format!("{DATABASE} HMF-4")).heading())
+                            .clicked()
+                        {
+                            self.tree.insert_pane(Pane::init(HMF4.clone(), "HMF-4"));
                             ui.close_menu();
                         }
                     });
@@ -372,11 +364,7 @@ impl App {
             match ron::de::from_str(&content) {
                 Ok(data_frame) => {
                     trace!(?data_frame);
-                    self.tree.insert_pane(Pane {
-                        data_frame,
-                        control: Control::with_settings(Settings::default().with_label(name)),
-                    });
-                    // ctx.request_repaint();
+                    self.tree.insert_pane(Pane::init(data_frame, name));
                 }
                 Err(error) => error!(%error),
             };

@@ -10,3 +10,6 @@ pub(crate) static HMF2: LazyLock<DataFrame> = LazyLock::new(|| {
 pub(crate) static HMF3: LazyLock<DataFrame> = LazyLock::new(|| {
     ron::de::from_str(include_str!("HMF-3.hmf.ron")).expect("deserialize HMF-3.hmf.ron")
 });
+pub(crate) static HMF4: LazyLock<DataFrame> = LazyLock::new(|| {
+    ron::de::from_str(include_str!("HMF-4.hmf.ron")).expect("deserialize HMF-4.hmf.ron")
+});
