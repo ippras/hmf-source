@@ -1,39 +1,40 @@
 use self::{
-    panes::{behavior::Behavior, Pane},
+    panes::{Pane, behavior::Behavior},
     windows::About,
 };
 use crate::{
-    localization::{localize, UiExt},
+    localization::{UiExt, localize},
     presets::{
-        C70_CONTROL, C70_H2O2, CP_9, CV_15, CV_395, CZ_30412, HMF_1, HMF_2, HMF_3, HMF_4, ISO_FJ,
+        C70_CONTROL, C70_H2O2, C70_NACL, CP_9, CV_15, CV_395, CZ_30412, HMF_1, HMF_2, HMF_3, HMF_4,
+        ISO_FJ,
     },
 };
-use eframe::{get_value, set_value, CreationContext, Storage, APP_KEY};
+use eframe::{APP_KEY, CreationContext, Storage, get_value, set_value};
 use egui::{
-    menu::bar, vec2, warn_if_debug_build, Align, Align2, CentralPanel, Color32, Context,
-    FontDefinitions, Id, LayerId, Layout, Order, RichText, ScrollArea, Sides, TextStyle,
-    TopBottomPanel, Vec2, Visuals,
+    Align, Align2, CentralPanel, Color32, Context, FontDefinitions, Id, LayerId, Layout, Order,
+    RichText, ScrollArea, Sides, TextStyle, TopBottomPanel, Vec2, Visuals, menu::bar, vec2,
+    warn_if_debug_build,
 };
 use egui_ext::{DroppedFileExt, HoveredFileExt, LightDarkButton};
 use egui_notify::Toasts;
 use egui_phosphor::{
-    add_to_fonts,
+    Variant, add_to_fonts,
     regular::{
-        ARROWS_CLOCKWISE, DATABASE, GRID_FOUR, INFO, PLUS, SQUARE_SPLIT_HORIZONTAL,
-        SQUARE_SPLIT_VERTICAL, TABS, TRASH,
+        ARROWS_CLOCKWISE, ARROWS_HORIZONTAL, DATABASE, GEAR, GRID_FOUR, INFO, PENCIL, PLUS,
+        SQUARE_SPLIT_HORIZONTAL, SQUARE_SPLIT_VERTICAL, TABS, TRASH,
     },
-    Variant,
 };
-use egui_tiles::{ContainerKind, Tile, Tree};
-use egui_tiles_ext::TreeExt as _;
-use panes::calculation::control::{Control, Settings};
+use egui_tiles::{Container, ContainerKind, Tile, TileId, Tiles, Tree};
+use egui_tiles_ext::{ContainerExt as _, TilesExt as _, TreeExt as _};
+use itertools::Either;
 use serde::{Deserialize, Serialize};
 use std::{
     borrow::BorrowMut,
     fmt::Write,
+    iter::once,
     mem::take,
     str,
-    sync::mpsc::{channel, Receiver, Sender},
+    sync::mpsc::{Receiver, Sender, channel},
     time::Duration,
 };
 use tracing::{error, info, trace};
@@ -231,10 +232,52 @@ impl App {
                         }
                     }
                     ui.separator();
-                    // Create
-                    if ui.button(RichText::new(PLUS).size(SIZE)).clicked() {
-                        self.tree.insert_pane(Pane::new());
-                    }
+                    // Resizable
+                    let mut resizable = true;
+                    if ui
+                        .button(RichText::new(ARROWS_HORIZONTAL).size(SIZE))
+                        .on_hover_text(localize!("resize"))
+                        .clicked()
+                    {
+                        let mut panes = self
+                            .tree
+                            .tiles
+                            .tiles_mut()
+                            .filter_map(|tile| match tile {
+                                Tile::Pane(pane) => Some(pane),
+                                Tile::Container(_) => None,
+                            })
+                            .peekable();
+                        if let Some(pane) = panes.peek() {
+                            resizable ^= pane.control.settings.resizable;
+                        }
+                        for pane in panes {
+                            pane.control.settings.resizable = resizable;
+                        }
+                    };
+                    let mut editable = true;
+                    if ui
+                        .button(RichText::new(PENCIL).size(SIZE))
+                        .on_hover_text(localize!("edit"))
+                        .clicked()
+                    {
+                        let mut panes = self
+                            .tree
+                            .tiles
+                            .tiles_mut()
+                            .filter_map(|tile| match tile {
+                                Tile::Pane(pane) => Some(pane),
+                                Tile::Container(_) => None,
+                            })
+                            .peekable();
+                        if let Some(pane) = panes.peek() {
+                            editable ^= pane.control.settings.editable;
+                        }
+                        for pane in panes {
+                            pane.control.settings.editable = editable;
+                        }
+                    };
+                    ui.separator();
                     // Load
                     ui.menu_button(RichText::new(DATABASE).size(SIZE), |ui| {
                         if ui
@@ -320,7 +363,19 @@ impl App {
                                 .insert_pane(Pane::init(C70_H2O2.clone(), "C70-H2O2"));
                             ui.close_menu();
                         }
+                        if ui
+                            .button(RichText::new(format!("{DATABASE} C70-NaCl")).heading())
+                            .clicked()
+                        {
+                            self.tree
+                                .insert_pane(Pane::init(C70_NACL.clone(), "C70-NaCl"));
+                            ui.close_menu();
+                        }
                     });
+                    // Create
+                    if ui.button(RichText::new(PLUS).size(SIZE)).clicked() {
+                        self.tree.insert_pane(Pane::new());
+                    }
                     ui.separator();
                     // About
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
@@ -341,6 +396,67 @@ impl App {
         });
     }
 }
+
+// /// Extension methods for [`Tiles`]
+// pub trait TilesExt<T> {
+//     fn filter_child_pane<'a>(
+//         &'a mut self,
+//         f: impl Fn(&T) -> bool + 'a,
+//     ) -> impl Iterator<Item = TileId> + 'a;
+// }
+
+// impl<T> TilesExt<T> for Tiles<T> {
+//     fn filter_child_pane<'a>(
+//         &'a mut self,
+//         f: impl Fn(&T) -> bool + 'a,
+//     ) -> impl Iterator<Item = TileId> + 'a {
+//         self.tiles()
+//     }
+// }
+
+// /// [`Container`] extension methods
+// pub trait ContainerExt {
+//     fn filter_child_pane<'a, T>(
+//         &'a self,
+//         tiles: &'a Tiles<T>,
+//     ) -> Box<dyn Iterator<Item = &'a T> + 'a>;
+// }
+
+// impl ContainerExt for Container {
+//     fn filter_child_pane<'a, T>(
+//         &'a self,
+//         tiles: &'a Tiles<T>,
+//     ) -> Box<dyn Iterator<Item = &'a T> + 'a> {
+//         Box::new(
+//             self.children()
+//                 .filter_map(|child| tiles.get(*child))
+//                 .flat_map(|child| match child {
+//                     Tile::Container(container) => container.filter_child_pane(tiles),
+//                     Tile::Pane(pane) => Box::new(once(pane)),
+//                 }),
+//         )
+//     }
+
+//     // fn active_panes<'a, T>(&'a self, tiles: &'a Tiles<T>, f: impl Fn(&T)) {
+//     //     for child in self.active_children() {
+//     //         match tiles.get(*child).unwrap() {
+//     //             Tile::Container(container) => container.active_panes(tiles, &f),
+//     //             Tile::Pane(pane) => f(pane),
+//     //         }
+//     //     }
+//     // }
+// }
+
+// fn filter_pane_by<'a, T: 'a>(
+//     iter: impl Iterator<Item = (&'a TileId, &'a Tile<T>)> + 'a,
+//     f: impl Fn(&T) -> bool + 'a,
+// ) -> impl Iterator<Item = TileId> + 'a {
+//     iter.filter(move |(_, tile)| match *tile {
+//         Tile::Pane(pane) => f(pane),
+//         Tile::Container(container) => container.children(),
+//     })
+//     .map(|(tile_id, _)| *tile_id)
+// }
 
 // Windows
 impl App {

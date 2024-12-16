@@ -1,5 +1,5 @@
 use crate::{app::MAX_PRECISION, localization::localize};
-use egui::{DragValue, Grid, Slider, Ui, Widget, Window};
+use egui::{Grid, Slider, Ui, Window};
 use egui_phosphor::regular::GEAR;
 use serde::{Deserialize, Serialize};
 
@@ -18,15 +18,8 @@ impl Control {
         }
     }
 
-    // pub(crate) fn with_settings(settings: Settings) -> Self {
-    //     Self {
-    //         settings,
-    //         ..Self::new()
-    //     }
-    // }
-
     pub(crate) fn windows(&mut self, ui: &mut Ui) {
-        Window::new(format!("{GEAR} Configuration settings"))
+        Window::new(format!("{GEAR} Calculation settings"))
             .id(ui.next_auto_id())
             .default_pos(ui.next_widget_position())
             .open(&mut self.open)
@@ -34,7 +27,7 @@ impl Control {
     }
 }
 
-/// Configuration settings
+/// Calculation settings
 #[derive(Clone, Debug, Deserialize, Hash, PartialEq, Serialize)]
 pub(crate) struct Settings {
     #[serde(skip)]
@@ -67,7 +60,7 @@ impl Settings {
     }
 
     pub(crate) fn ui(&mut self, ui: &mut Ui) {
-        Grid::new("configuration").show(ui, |ui| {
+        Grid::new(ui.next_auto_id()).show(ui, |ui| {
             // Precision
             ui.label(localize!("precision"));
             ui.add(Slider::new(&mut self.precision, 0..=MAX_PRECISION));

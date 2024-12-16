@@ -4,14 +4,14 @@ use self::{
 };
 use crate::localization::localize;
 use anyhow::Result;
-use egui::{menu::bar, RichText, ScrollArea, TextEdit, Ui};
+use egui::{RichText, ScrollArea, TextEdit, Ui, menu::bar};
 use egui_phosphor::regular::{ARROWS_HORIZONTAL, FLOPPY_DISK, GEAR, PENCIL, PLUS, TAG};
 use polars::prelude::*;
 use ron::{extensions::Extensions, ser::PrettyConfig};
 use serde::{Deserialize, Serialize};
 use tracing::error;
 
-/// Configuration pane
+/// Calculation pane
 #[derive(Default, Deserialize, Serialize)]
 pub(crate) struct Pane {
     pub(crate) data_frame: DataFrame,

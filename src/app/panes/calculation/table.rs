@@ -1,20 +1,20 @@
 use super::control::Settings;
 use crate::{
     app::{
+        MARGIN,
         computers::{CalculationComputed, CalculationKey},
         widgets::{FattyAcidWidget, FloatWidget},
-        MARGIN,
     },
     special::{
         fatty_acid::FattyAcid,
-        polars::{series::SeriesExt as _, DataFrameExt as _},
+        polars::{DataFrameExt as _, series::SeriesExt as _},
     },
 };
-use egui::{Frame, Id, Margin, TextStyle, TextWrapMode, Ui};
+use egui::{Frame, Id, InnerResponse, Margin, Response, TextStyle, TextWrapMode, Ui};
 use egui_phosphor::regular::MINUS;
 use egui_table::{AutoSizeMode, CellInfo, Column, HeaderCellInfo, HeaderRow, Table, TableDelegate};
 use polars::{chunked_array::builder::AnonymousOwnedListBuilder, prelude::*};
-use std::ops::Range;
+use std::{borrow::Cow, ops::Range};
 
 const ID: Range<usize> = 0..2;
 const EXPERIMENTAL: Range<usize> = ID.end..ID.end + 2;
@@ -200,18 +200,67 @@ impl TableView<'_> {
                         .try_apply("FattyAcid", fatty_acid_change(row, &value))?;
                 }
             }
-            (row, 2) => self.experimental(ui, row, "TAG")?,
-            (row, 3) => self.experimental(ui, row, "MAG")?,
-            (row, 4) => self.calculated(ui, row, ["SN123", "A"])?,
-            (row, 5) => self.calculated(ui, row, ["SN123", "B"])?,
-            (row, 6) => self.calculated(ui, row, ["SN123", "C"])?,
-            (row, 7) => self.calculated(ui, row, ["SN123", "D"])?,
-            (row, 8) => self.calculated(ui, row, ["SN123", "E"])?,
-            (row, 9) => self.calculated(ui, row, ["SN2", "A"])?,
-            (row, 10) => self.calculated(ui, row, ["SN2", "B"])?,
-            (row, 11) => self.calculated(ui, row, ["SN2", "C"])?,
-            (row, 12) => self.calculated(ui, row, ["SN2", "D"])?,
-            (row, 13) => self.calculated(ui, row, ["SN2", "E"])?,
+            (row, 2) => {
+                self.experimental(ui, row, "TAG")?;
+            }
+            (row, 3) => {
+                self.experimental(ui, row, "MAG")?;
+            }
+            (row, 4) => {
+                self.calculated(ui, row, "SN123", &["A", "Value"])?
+                    .on_hover_ui(|ui| {
+                        ui.horizontal(|ui| {
+                            FloatWidget::new(|| {
+                                Ok(self.target["SN123"]
+                                    .struct_()?
+                                    .field_by_name("A")?
+                                    .struct_()?
+                                    .field_by_name("Min")?
+                                    .f64()?
+                                    .get(row))
+                            })
+                            .ui(ui);
+                            ui.label("-");
+                            FloatWidget::new(|| {
+                                Ok(self.target["SN123"]
+                                    .struct_()?
+                                    .field_by_name("A")?
+                                    .struct_()?
+                                    .field_by_name("Max")?
+                                    .f64()?
+                                    .get(row))
+                            })
+                            .ui(ui);
+                        });
+                    });
+            }
+            (row, 5) => {
+                self.calculated(ui, row, "SN123", &["B"])?;
+            }
+            (row, 6) => {
+                self.calculated(ui, row, "SN123", &["C"])?;
+            }
+            (row, 7) => {
+                self.calculated(ui, row, "SN123", &["D"])?;
+            }
+            (row, 8) => {
+                self.calculated(ui, row, "SN123", &["E"])?;
+            }
+            (row, 9) => {
+                self.calculated(ui, row, "SN2", &["A"])?;
+            }
+            (row, 10) => {
+                self.calculated(ui, row, "SN2", &["B"])?;
+            }
+            (row, 11) => {
+                self.calculated(ui, row, "SN2", &["C"])?;
+            }
+            (row, 12) => {
+                self.calculated(ui, row, "SN2", &["D"])?;
+            }
+            (row, 13) => {
+                self.calculated(ui, row, "SN2", &["E"])?;
+            }
             (row, 14) => {
                 FloatWidget::new(|| Ok(self.target["F"].f64()?.get(row)))
                     .precision(Some(self.settings.precision))
@@ -304,32 +353,37 @@ impl TableView<'_> {
         Ok(())
     }
 
-    fn experimental(&mut self, ui: &mut Ui, row: usize, column: &str) -> PolarsResult<()> {
-        let changed = FloatWidget::new(|| Ok(self.source[column].f64()?.get(row)))
+    fn experimental(&mut self, ui: &mut Ui, row: usize, column: &str) -> PolarsResult<Response> {
+        let inner_response = FloatWidget::new(|| Ok(self.source[column].f64()?.get(row)))
             .editable(self.settings.editable)
             .precision(Some(self.settings.precision))
             .hover()
-            .ui(ui)
-            .inner;
-        if let Some(value) = changed {
+            .ui(ui);
+        if let Some(value) = inner_response.inner {
             self.source
                 .try_apply(column, experimental_change(row, value))?;
         }
-        Ok(())
+        Ok(inner_response.response)
     }
 
-    fn calculated(&mut self, ui: &mut Ui, row: usize, column: [&str; 2]) -> PolarsResult<()> {
-        FloatWidget::new(|| {
-            Ok(self.target[column[0]]
-                .struct_()?
-                .field_by_name(column[1])?
-                .f64()?
-                .get(row))
+    fn calculated(
+        &mut self,
+        ui: &mut Ui,
+        row: usize,
+        column: &str,
+        fields: &[&str],
+    ) -> PolarsResult<Response> {
+        Ok(FloatWidget::new(|| {
+            let mut series = Cow::Borrowed(self.target[column].as_materialized_series());
+            for field in fields {
+                series = Cow::Owned(series.struct_()?.field_by_name(field)?);
+            }
+            Ok(series.f64()?.get(row))
         })
         .precision(Some(self.settings.precision))
         .hover()
-        .ui(ui);
-        Ok(())
+        .ui(ui)
+        .response)
     }
 }
 
