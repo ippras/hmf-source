@@ -29,6 +29,9 @@ pub(crate) static CV_395: LazyLock<DataFrame> = LazyLock::new(|| {
 pub(crate) static C70_CONTROL: LazyLock<DataFrame> = LazyLock::new(|| {
     ron::de::from_str(include_str!("C70-Control.hmf.ron")).expect("deserialize C70-Control.hmf.ron")
 });
+pub(crate) static C70_H2O2: LazyLock<DataFrame> = LazyLock::new(|| {
+    ron::de::from_str(include_str!("C70-H2O2.hmf.ron")).expect("deserialize C70-H2O2.hmf.ron")
+});
 
 pub(crate) static ISO_FJ: LazyLock<DataFrame> = LazyLock::new(|| {
     ron::de::from_str(include_str!("ISO-FJ.hmf.ron")).expect("deserialize ISO-FJ.hmf.ron")

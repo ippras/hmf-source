@@ -4,7 +4,9 @@ use self::{
 };
 use crate::{
     localization::{localize, UiExt},
-    presets::{C70_CONTROL, CP_9, CV_15, CV_395, CZ_30412, HMF_1, HMF_2, HMF_3, HMF_4, ISO_FJ},
+    presets::{
+        C70_CONTROL, C70_H2O2, CP_9, CV_15, CV_395, CZ_30412, HMF_1, HMF_2, HMF_3, HMF_4, ISO_FJ,
+    },
 };
 use eframe::{get_value, set_value, CreationContext, Storage, APP_KEY};
 use egui::{
@@ -303,11 +305,19 @@ impl App {
                         }
                         ui.separator();
                         if ui
-                            .button(RichText::new(format!("{DATABASE} C70-CONTROL")).heading())
+                            .button(RichText::new(format!("{DATABASE} C70-Control")).heading())
                             .clicked()
                         {
                             self.tree
-                                .insert_pane(Pane::init(C70_CONTROL.clone(), "C70-CONTROL"));
+                                .insert_pane(Pane::init(C70_CONTROL.clone(), "C70-Control"));
+                            ui.close_menu();
+                        }
+                        if ui
+                            .button(RichText::new(format!("{DATABASE} C70-H2O2")).heading())
+                            .clicked()
+                        {
+                            self.tree
+                                .insert_pane(Pane::init(C70_H2O2.clone(), "C70-H2O2"));
                             ui.close_menu();
                         }
                     });
