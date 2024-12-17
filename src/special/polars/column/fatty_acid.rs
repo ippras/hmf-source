@@ -1,5 +1,5 @@
 use crate::special::polars::series::{
-    fatty_acids::FattyAcidSeries, identifier::Identifier, SeriesExt as _,
+    SeriesExt as _, fatty_acids::FattyAcidSeries, identifier::Identifier,
 };
 use polars::prelude::*;
 

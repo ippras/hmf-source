@@ -1,4 +1,4 @@
-use egui::{vec2, DragValue, InnerResponse, RichText, Ui};
+use egui::{DragValue, InnerResponse, RichText, Ui, vec2};
 use polars::prelude::*;
 
 /// Float widget

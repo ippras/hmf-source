@@ -2,10 +2,10 @@ use self::locales::{EN, RU};
 use crate::app::SIZE;
 use egui::{Response, RichText, Ui};
 use egui_phosphor::regular::TRANSLATE;
-use fluent::{concurrent::FluentBundle, FluentResource};
+use fluent::{FluentResource, concurrent::FluentBundle};
 use fluent_content::Content;
 use std::sync::{Arc, LazyLock, RwLock};
-use tracing::{enabled, error, Level};
+use tracing::{Level, enabled, error};
 use unic_langid::LanguageIdentifier;
 
 pub(crate) macro lowercase($key:expr) {
@@ -105,7 +105,7 @@ impl UiExt for Ui {
 }
 
 mod locales {
-    use unic_langid::{langid, LanguageIdentifier};
+    use unic_langid::{LanguageIdentifier, langid};
 
     pub(super) const EN: LanguageIdentifier = langid!("en");
     pub(super) const RU: LanguageIdentifier = langid!("ru");

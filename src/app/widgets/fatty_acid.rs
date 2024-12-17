@@ -1,5 +1,5 @@
 use crate::special::{
-    fatty_acid::{DisplayWithOptions, FattyAcid, COMMON},
+    fatty_acid::{COMMON, DisplayWithOptions, FattyAcid},
     mature_milk::MATURE_MILK,
     polars::DataFrameExt as _,
 };

@@ -1,8 +1,5 @@
-use self::series::{fatty_acids::FattyAcidSeries, identifier::Identifier, SeriesExt as _};
-use crate::{
-    r#const::relative_atomic_mass::{C, H, O},
-    // utils::polars::ExprExt as _,
-};
+use self::series::{SeriesExt as _, fatty_acids::FattyAcidSeries, identifier::Identifier};
+use crate::r#const::relative_atomic_mass::{C, H, O};
 use column::fatty_acid::ColumnExt as _;
 use polars::prelude::*;
 use std::{borrow::Borrow, sync::LazyLock};
