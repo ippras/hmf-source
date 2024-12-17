@@ -197,7 +197,7 @@ impl TableView<'_> {
                     .inner;
                 if let Some(value) = changed {
                     self.source
-                        .try_apply("FattyAcid", fatty_acid_change(row, &value))?;
+                        .try_apply("FattyAcid", change_fatty_acid(row, &value))?;
                 }
             }
             (row, 2) => {
@@ -361,7 +361,7 @@ impl TableView<'_> {
             .ui(ui);
         if let Some(value) = inner_response.inner {
             self.source
-                .try_apply(column, experimental_change(row, value))?;
+                .try_apply(column, change_experimental(row, value))?;
         }
         Ok(inner_response.response)
     }
@@ -416,9 +416,9 @@ impl TableDelegate for TableView<'_> {
     }
 }
 
-fn fatty_acid_change(
+fn change_fatty_acid(
     row: usize,
-    changed: &FattyAcid,
+    new: &FattyAcid,
 ) -> impl FnMut(&Series) -> PolarsResult<Series> + '_ {
     move |series| {
         let fatty_acid_series = series.fatty_acid();
@@ -434,7 +434,7 @@ fn fatty_acid_change(
         for index in 0..fatty_acid_series.len() {
             let mut fatty_acid = fatty_acid_series.get(index)?;
             if index == row {
-                fatty_acid = Some(changed.clone());
+                fatty_acid = Some(new.clone());
             }
             let fatty_acid = fatty_acid.as_ref();
             // Carbons
@@ -507,7 +507,7 @@ fn fatty_acid_change(
     }
 }
 
-fn experimental_change(row: usize, changed: f64) -> impl FnMut(&Series) -> PolarsResult<Series> {
+fn change_experimental(row: usize, new: f64) -> impl FnMut(&Series) -> PolarsResult<Series> {
     move |series| {
         Ok(series
             .f64()?
@@ -515,7 +515,7 @@ fn experimental_change(row: usize, changed: f64) -> impl FnMut(&Series) -> Polar
             .enumerate()
             .map(|(index, mut value)| {
                 if index == row {
-                    value = Some(changed);
+                    value = Some(new);
                 }
                 Ok(value)
             })

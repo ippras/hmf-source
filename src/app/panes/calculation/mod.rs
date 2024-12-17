@@ -133,7 +133,6 @@ impl Pane {
                 ..Default::default()
             },
         )?
-        // .with_row_index("Index", Some(self.data_frame.height() as _))
         .collect()?;
         Ok(())
     }
