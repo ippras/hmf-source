@@ -25,8 +25,7 @@ use egui_phosphor::{
     },
 };
 use egui_tiles::{Container, ContainerKind, Tile, TileId, Tiles, Tree};
-use egui_tiles_ext::{ContainerExt as _, TilesExt as _, TreeExt as _};
-use itertools::Either;
+use egui_tiles_ext::{ContainerExt as _, TAB, TilesExt as _, TreeExt as _};
 use serde::{Deserialize, Serialize};
 use std::{
     borrow::BorrowMut,
@@ -239,15 +238,7 @@ impl App {
                         .on_hover_text(localize!("resize"))
                         .clicked()
                     {
-                        let mut panes = self
-                            .tree
-                            .tiles
-                            .tiles_mut()
-                            .filter_map(|tile| match tile {
-                                Tile::Pane(pane) => Some(pane),
-                                Tile::Container(_) => None,
-                            })
-                            .peekable();
+                        let mut panes = self.tree.tiles.panes_mut().peekable();
                         if let Some(pane) = panes.peek() {
                             resizable ^= pane.control.settings.resizable;
                         }
@@ -255,21 +246,14 @@ impl App {
                             pane.control.settings.resizable = resizable;
                         }
                     };
+                    // Editable
                     let mut editable = true;
                     if ui
                         .button(RichText::new(PENCIL).size(SIZE))
                         .on_hover_text(localize!("edit"))
                         .clicked()
                     {
-                        let mut panes = self
-                            .tree
-                            .tiles
-                            .tiles_mut()
-                            .filter_map(|tile| match tile {
-                                Tile::Pane(pane) => Some(pane),
-                                Tile::Container(_) => None,
-                            })
-                            .peekable();
+                        let mut panes = self.tree.tiles.panes_mut().peekable();
                         if let Some(pane) = panes.peek() {
                             editable ^= pane.control.settings.editable;
                         }
@@ -284,28 +268,32 @@ impl App {
                             .button(RichText::new(format!("{DATABASE} HMF-1")).heading())
                             .clicked()
                         {
-                            self.tree.insert_pane(Pane::init(HMF_1.clone(), "HMF-1"));
+                            self.tree
+                                .insert_pane::<TAB>(Pane::init(HMF_1.clone(), "HMF-1"));
                             ui.close_menu();
                         }
                         if ui
                             .button(RichText::new(format!("{DATABASE} HMF-2")).heading())
                             .clicked()
                         {
-                            self.tree.insert_pane(Pane::init(HMF_2.clone(), "HMF-2"));
+                            self.tree
+                                .insert_pane::<TAB>(Pane::init(HMF_2.clone(), "HMF-2"));
                             ui.close_menu();
                         }
                         if ui
                             .button(RichText::new(format!("{DATABASE} HMF-3")).heading())
                             .clicked()
                         {
-                            self.tree.insert_pane(Pane::init(HMF_3.clone(), "HMF-3"));
+                            self.tree
+                                .insert_pane::<TAB>(Pane::init(HMF_3.clone(), "HMF-3"));
                             ui.close_menu();
                         }
                         if ui
                             .button(RichText::new(format!("{DATABASE} HMF-4")).heading())
                             .clicked()
                         {
-                            self.tree.insert_pane(Pane::init(HMF_4.clone(), "HMF-4"));
+                            self.tree
+                                .insert_pane::<TAB>(Pane::init(HMF_4.clone(), "HMF-4"));
                             ui.close_menu();
                         }
                         ui.separator();
@@ -313,7 +301,8 @@ impl App {
                             .button(RichText::new(format!("{DATABASE} CV-15")).heading())
                             .clicked()
                         {
-                            self.tree.insert_pane(Pane::init(CV_15.clone(), "CV-15"));
+                            self.tree
+                                .insert_pane::<TAB>(Pane::init(CV_15.clone(), "CV-15"));
                             ui.close_menu();
                         }
                         if ui
@@ -321,21 +310,23 @@ impl App {
                             .clicked()
                         {
                             self.tree
-                                .insert_pane(Pane::init(CZ_30412.clone(), "CZ-30412"));
+                                .insert_pane::<TAB>(Pane::init(CZ_30412.clone(), "CZ-30412"));
                             ui.close_menu();
                         }
                         if ui
                             .button(RichText::new(format!("{DATABASE} CP-9")).heading())
                             .clicked()
                         {
-                            self.tree.insert_pane(Pane::init(CP_9.clone(), "CP-9"));
+                            self.tree
+                                .insert_pane::<TAB>(Pane::init(CP_9.clone(), "CP-9"));
                             ui.close_menu();
                         }
                         if ui
                             .button(RichText::new(format!("{DATABASE} CV-395")).heading())
                             .clicked()
                         {
-                            self.tree.insert_pane(Pane::init(CV_395.clone(), "CV-395"));
+                            self.tree
+                                .insert_pane::<TAB>(Pane::init(CV_395.clone(), "CV-395"));
                             ui.close_menu();
                         }
                         //
@@ -343,7 +334,8 @@ impl App {
                             .button(RichText::new(format!("{DATABASE} ISO-FJ")).heading())
                             .clicked()
                         {
-                            self.tree.insert_pane(Pane::init(ISO_FJ.clone(), "ISO-FJ"));
+                            self.tree
+                                .insert_pane::<TAB>(Pane::init(ISO_FJ.clone(), "ISO-FJ"));
                             ui.close_menu();
                         }
                         ui.separator();
@@ -352,7 +344,7 @@ impl App {
                             .clicked()
                         {
                             self.tree
-                                .insert_pane(Pane::init(C70_CONTROL.clone(), "C70-Control"));
+                                .insert_pane::<TAB>(Pane::init(C70_CONTROL.clone(), "C70-Control"));
                             ui.close_menu();
                         }
                         if ui
@@ -360,7 +352,7 @@ impl App {
                             .clicked()
                         {
                             self.tree
-                                .insert_pane(Pane::init(C70_H2O2.clone(), "C70-H2O2"));
+                                .insert_pane::<TAB>(Pane::init(C70_H2O2.clone(), "C70-H2O2"));
                             ui.close_menu();
                         }
                         if ui
@@ -368,13 +360,13 @@ impl App {
                             .clicked()
                         {
                             self.tree
-                                .insert_pane(Pane::init(C70_NACL.clone(), "C70-NaCl"));
+                                .insert_pane::<TAB>(Pane::init(C70_NACL.clone(), "C70-NaCl"));
                             ui.close_menu();
                         }
                     });
                     // Create
                     if ui.button(RichText::new(PLUS).size(SIZE)).clicked() {
-                        self.tree.insert_pane(Pane::new());
+                        self.tree.insert_pane::<TAB>(Pane::new());
                     }
                     ui.separator();
                     // About
@@ -396,67 +388,6 @@ impl App {
         });
     }
 }
-
-// /// Extension methods for [`Tiles`]
-// pub trait TilesExt<T> {
-//     fn filter_child_pane<'a>(
-//         &'a mut self,
-//         f: impl Fn(&T) -> bool + 'a,
-//     ) -> impl Iterator<Item = TileId> + 'a;
-// }
-
-// impl<T> TilesExt<T> for Tiles<T> {
-//     fn filter_child_pane<'a>(
-//         &'a mut self,
-//         f: impl Fn(&T) -> bool + 'a,
-//     ) -> impl Iterator<Item = TileId> + 'a {
-//         self.tiles()
-//     }
-// }
-
-// /// [`Container`] extension methods
-// pub trait ContainerExt {
-//     fn filter_child_pane<'a, T>(
-//         &'a self,
-//         tiles: &'a Tiles<T>,
-//     ) -> Box<dyn Iterator<Item = &'a T> + 'a>;
-// }
-
-// impl ContainerExt for Container {
-//     fn filter_child_pane<'a, T>(
-//         &'a self,
-//         tiles: &'a Tiles<T>,
-//     ) -> Box<dyn Iterator<Item = &'a T> + 'a> {
-//         Box::new(
-//             self.children()
-//                 .filter_map(|child| tiles.get(*child))
-//                 .flat_map(|child| match child {
-//                     Tile::Container(container) => container.filter_child_pane(tiles),
-//                     Tile::Pane(pane) => Box::new(once(pane)),
-//                 }),
-//         )
-//     }
-
-//     // fn active_panes<'a, T>(&'a self, tiles: &'a Tiles<T>, f: impl Fn(&T)) {
-//     //     for child in self.active_children() {
-//     //         match tiles.get(*child).unwrap() {
-//     //             Tile::Container(container) => container.active_panes(tiles, &f),
-//     //             Tile::Pane(pane) => f(pane),
-//     //         }
-//     //     }
-//     // }
-// }
-
-// fn filter_pane_by<'a, T: 'a>(
-//     iter: impl Iterator<Item = (&'a TileId, &'a Tile<T>)> + 'a,
-//     f: impl Fn(&T) -> bool + 'a,
-// ) -> impl Iterator<Item = TileId> + 'a {
-//     iter.filter(move |(_, tile)| match *tile {
-//         Tile::Pane(pane) => f(pane),
-//         Tile::Container(container) => container.children(),
-//     })
-//     .map(|(tile_id, _)| *tile_id)
-// }
 
 // Windows
 impl App {
@@ -537,7 +468,7 @@ impl App {
             match ron::de::from_str(&content) {
                 Ok(data_frame) => {
                     trace!(?data_frame);
-                    self.tree.insert_pane(Pane::init(data_frame, name));
+                    self.tree.insert_pane::<TAB>(Pane::init(data_frame, name));
                 }
                 Err(error) => error!(%error),
             };

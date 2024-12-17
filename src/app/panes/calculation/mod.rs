@@ -5,7 +5,7 @@ use self::{
 use crate::localization::localize;
 use anyhow::Result;
 use egui::{RichText, ScrollArea, TextEdit, Ui, menu::bar};
-use egui_phosphor::regular::{ARROWS_HORIZONTAL, FLOPPY_DISK, GEAR, PENCIL, PLUS, TAG};
+use egui_phosphor::regular::{ARROWS_HORIZONTAL, FLOPPY_DISK, GEAR, MINUS, PENCIL, PLUS, TAG};
 use polars::prelude::*;
 use ron::{extensions::Extensions, ser::PrettyConfig};
 use serde::{Deserialize, Serialize};
@@ -71,12 +71,25 @@ impl Pane {
                 })
                 .response
                 .on_hover_text(localize!("label"));
+                ui.separator();
+                ui.add_enabled_ui(!self.data_frame.is_empty(), |ui| {
+                    ui.menu_button(RichText::new(MINUS).heading(), |ui| {
+                        for index in 0..self.data_frame.height() {
+                            if ui.button(format!("{MINUS} with index {index}")).clicked() {
+                                self.delete_row(index).unwrap();
+                                if self.data_frame.is_empty() {
+                                    ui.close_menu();
+                                }
+                            }
+                        }
+                    });
+                });
                 if ui
                     .button(RichText::new(PLUS).heading())
                     .on_hover_text(localize!("add"))
                     .clicked()
                 {
-                    self.add().unwrap();
+                    self.add_row().unwrap();
                 }
                 ui.separator();
                 ui.toggle_value(&mut self.control.open, RichText::new(GEAR).heading())
@@ -107,7 +120,7 @@ impl Pane {
         0
     }
 
-    pub(crate) fn add(&mut self) -> PolarsResult<()> {
+    pub(crate) fn add_row(&mut self) -> PolarsResult<()> {
         self.data_frame = concat(
             [
                 self.data_frame.clone().lazy(),
@@ -137,6 +150,17 @@ impl Pane {
         Ok(())
     }
 
+    // https://stackoverflow.com/questions/71486019/how-to-drop-row-in-polars-python
+    // https://stackoverflow.com/a/71495211/1522758
+    pub(crate) fn delete_row(&mut self, row: usize) -> PolarsResult<()> {
+        self.data_frame = self
+            .data_frame
+            .slice(0, row)
+            .vstack(&self.data_frame.slice((row + 1) as _, usize::MAX))?;
+        self.data_frame.as_single_chunk_par();
+        Ok(())
+    }
+
     fn save(&self) -> Result<()> {
         let contents = ron::ser::to_string_pretty(
             &self.data_frame,
@@ -146,30 +170,6 @@ impl Pane {
         Ok(())
     }
 }
-
-// fn fatty_acid_add() -> impl FnMut(&Series) -> PolarsResult<Series> {
-//     move |series| {
-//         let fatty_acid_series = series.fatty_acid();
-//         let carbons = fatty_acid_series
-//             .carbons
-//             .u8()?
-//             .iter()
-//             .chain(None)
-//             .collect::<UInt8Chunked>();
-//         let unsaturated = fatty_acid_series
-//             .unsaturated
-//             .list()?
-//             .iter()
-//             .chain(None)
-//             .collect::<ListChunked>();
-//         Ok(StructChunked::from_series(
-//             series.name().clone(),
-//             fatty_acid_series.len(),
-//             [carbons.into_series(), unsaturated.into_series()].iter(),
-//         )?
-//         .into_series())
-//     }
-// }
 
 pub(crate) mod control;
 

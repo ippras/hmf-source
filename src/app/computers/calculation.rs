@@ -98,7 +98,6 @@ impl Computer {
             .alias("F")]);
             lazy_frame = lazy_frame.select([col("SN123"), col("SN2"), col("F")]);
         }
-        // println!("lazy_frame1: {}", lazy_frame.clone().collect().unwrap());
         lazy_frame = lazy_frame.with_row_index("Index", None);
         lazy_frame.collect()
     }

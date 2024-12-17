@@ -10,8 +10,7 @@ use crate::{
         polars::{DataFrameExt as _, series::SeriesExt as _},
     },
 };
-use egui::{Frame, Id, InnerResponse, Margin, Response, TextStyle, TextWrapMode, Ui};
-use egui_phosphor::regular::MINUS;
+use egui::{Frame, Id, Margin, Response, TextStyle, TextWrapMode, Ui};
 use egui_table::{AutoSizeMode, CellInfo, Column, HeaderCellInfo, HeaderRow, Table, TableDelegate};
 use polars::{chunked_array::builder::AnonymousOwnedListBuilder, prelude::*};
 use std::{borrow::Cow, ops::Range};
@@ -19,7 +18,6 @@ use std::{borrow::Cow, ops::Range};
 const ID: Range<usize> = 0..2;
 const EXPERIMENTAL: Range<usize> = ID.end..ID.end + 2;
 const CALCULATED: Range<usize> = EXPERIMENTAL.end..EXPERIMENTAL.end + 11;
-// const CONTROL: Range<usize> = CALCULATED.end..CALCULATED.end + 1;
 const LEN: usize = CALCULATED.end;
 
 const TOP: &[Range<usize>] = &[ID, EXPERIMENTAL, CALCULATED];
@@ -33,34 +31,6 @@ const MIDDLE: &[Range<usize>] = &[
     calculated::SN2,
     calculated::F,
 ];
-
-mod id {
-    use super::*;
-
-    pub(super) const INDEX: Range<usize> = ID.start..ID.start + 1;
-    pub(super) const FA: Range<usize> = INDEX.end..INDEX.end + 1;
-}
-
-mod experimental {
-    use super::*;
-
-    pub(super) const TAG123: Range<usize> = EXPERIMENTAL.start..EXPERIMENTAL.start + 1;
-    pub(super) const MAG2: Range<usize> = TAG123.end..TAG123.end + 1;
-}
-
-mod calculated {
-    use super::*;
-
-    pub(super) const SN123: Range<usize> = CALCULATED.start..CALCULATED.start + 5;
-    pub(super) const SN2: Range<usize> = SN123.end..SN123.end + 5;
-    pub(super) const F: Range<usize> = SN2.end..SN2.end + 1;
-
-    pub(super) const _A: Range<usize> = CALCULATED.start..CALCULATED.start + 1;
-    pub(super) const _B: Range<usize> = _A.end.._A.end + 1;
-    pub(super) const _C: Range<usize> = _B.end.._B.end + 1;
-    pub(super) const _D: Range<usize> = _C.end.._C.end + 1;
-    pub(super) const _E: Range<usize> = _D.end.._D.end + 1;
-}
 
 /// Table view
 pub(crate) struct TableView<'a> {
@@ -95,10 +65,7 @@ impl TableView<'_> {
         let id_salt = Id::new("CalculationDataTable");
         let height = ui.text_style_height(&TextStyle::Heading);
         let num_rows = self.source.height() as u64 + 1;
-        let mut num_columns = LEN;
-        if self.settings.editable {
-            num_columns += 1;
-        }
+        let num_columns = LEN;
         Table::new()
             .id_salt(id_salt)
             .num_rows(num_rows)
@@ -177,6 +144,17 @@ impl TableView<'_> {
             }
             _ => {} // _ => unreachable!(),
         };
+    }
+
+    fn cell_content_ui(&mut self, ui: &mut Ui, row: usize, column: usize) -> PolarsResult<()> {
+        if !self.source.is_empty() {
+            if row == self.source.height() {
+                self.footer_cell_content_ui(ui, column)?;
+            } else {
+                self.body_cell_content_ui(ui, row, column)?;
+            }
+        }
+        Ok(())
     }
 
     fn body_cell_content_ui(&mut self, ui: &mut Ui, row: usize, column: usize) -> PolarsResult<()> {
@@ -267,15 +245,6 @@ impl TableView<'_> {
                     .hover()
                     .ui(ui);
             }
-            (row, 15) => {
-                // Delete row
-                if self.settings.editable {
-                    if ui.button(MINUS).clicked() {
-                        self.delete(row)?;
-                        self.changed = true;
-                    }
-                }
-            }
             _ => {} // _ => unreachable!(),
         }
         Ok(())
@@ -342,17 +311,6 @@ impl TableView<'_> {
         Ok(())
     }
 
-    // https://stackoverflow.com/questions/71486019/how-to-drop-row-in-polars-python
-    // https://stackoverflow.com/a/71495211/1522758
-    pub(crate) fn delete(&mut self, row: usize) -> PolarsResult<()> {
-        *self.source = self
-            .source
-            .slice(0, row)
-            .vstack(&self.source.slice((row + 1) as _, usize::MAX))?;
-        self.source.as_single_chunk_par();
-        Ok(())
-    }
-
     fn experimental(&mut self, ui: &mut Ui, row: usize, column: &str) -> PolarsResult<Response> {
         let inner_response = FloatWidget::new(|| Ok(self.source[column].f64()?.get(row)))
             .editable(self.settings.editable)
@@ -404,14 +362,8 @@ impl TableDelegate for TableView<'_> {
         Frame::none()
             .inner_margin(Margin::symmetric(MARGIN.x, MARGIN.y))
             .show(ui, |ui| {
-                if !self.source.is_empty() {
-                    if cell.row_nr == self.source.height() as _ {
-                        self.footer_cell_content_ui(ui, cell.col_nr).unwrap()
-                    } else {
-                        self.body_cell_content_ui(ui, cell.row_nr as _, cell.col_nr)
-                            .unwrap()
-                    }
-                }
+                self.cell_content_ui(ui, cell.row_nr as _, cell.col_nr)
+                    .unwrap()
             });
     }
 }
@@ -522,4 +474,32 @@ fn change_experimental(row: usize, new: f64) -> impl FnMut(&Series) -> PolarsRes
             .collect::<PolarsResult<Float64Chunked>>()?
             .into_series())
     }
+}
+
+mod id {
+    use super::*;
+
+    pub(super) const INDEX: Range<usize> = ID.start..ID.start + 1;
+    pub(super) const FA: Range<usize> = INDEX.end..INDEX.end + 1;
+}
+
+mod experimental {
+    use super::*;
+
+    pub(super) const TAG123: Range<usize> = EXPERIMENTAL.start..EXPERIMENTAL.start + 1;
+    pub(super) const MAG2: Range<usize> = TAG123.end..TAG123.end + 1;
+}
+
+mod calculated {
+    use super::*;
+
+    pub(super) const SN123: Range<usize> = CALCULATED.start..CALCULATED.start + 5;
+    pub(super) const SN2: Range<usize> = SN123.end..SN123.end + 5;
+    pub(super) const F: Range<usize> = SN2.end..SN2.end + 1;
+
+    pub(super) const _A: Range<usize> = CALCULATED.start..CALCULATED.start + 1;
+    pub(super) const _B: Range<usize> = _A.end.._A.end + 1;
+    pub(super) const _C: Range<usize> = _B.end.._B.end + 1;
+    pub(super) const _D: Range<usize> = _C.end.._C.end + 1;
+    pub(super) const _E: Range<usize> = _D.end.._D.end + 1;
 }
