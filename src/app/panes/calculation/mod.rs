@@ -1,18 +1,15 @@
 use self::{
     control::{Control, Settings},
-    table::TableView,
+    table::{Event, TableView},
 };
 use crate::localization::localize;
 use anyhow::Result;
 use egui::{RichText, ScrollArea, TextEdit, Ui, menu::bar};
-use egui_phosphor::regular::{
-    ARROWS_HORIZONTAL, FLOPPY_DISK, GEAR, MINUS, PENCIL, PLUS, TAG, TRASH,
-};
+use egui_phosphor::regular::{ARROWS_HORIZONTAL, FLOPPY_DISK, GEAR, PENCIL, PLUS, TAG, TRASH};
 use polars::prelude::*;
 use ron::{extensions::Extensions, ser::PrettyConfig};
 use serde::{Deserialize, Serialize};
 use tracing::error;
-use tracing_subscriber::registry::Data;
 
 /// Calculation pane
 #[derive(Default, Deserialize, Serialize)]
@@ -81,29 +78,20 @@ impl Pane {
                     .on_hover_text(localize!("add"))
                     .clicked()
                 {
-                    self.add_row().unwrap();
+                    if let Err(error) = self.add_row() {
+                        error!(%error);
+                    }
                 }
-                // Delete
-                ui.add_enabled_ui(!self.data_frame.is_empty(), |ui| {
-                    ui.menu_button(RichText::new(MINUS).heading(), |ui| {
-                        for index in 0..self.data_frame.height() {
-                            if ui.button(format!("{MINUS} with index {index}")).clicked() {
-                                self.delete_row(index).unwrap();
-                                if self.data_frame.is_empty() {
-                                    ui.close_menu();
-                                }
-                            }
-                        }
-                    });
-                });
                 // Clear
-                if ui
-                    .button(RichText::new(TRASH).heading())
-                    .on_hover_text(localize!("clear"))
-                    .clicked()
-                {
-                    self.data_frame = DataFrame::empty();
-                }
+                ui.add_enabled_ui(!self.data_frame.is_empty(), |ui| {
+                    if ui
+                        .button(RichText::new(TRASH).heading())
+                        .on_hover_text(localize!("clear"))
+                        .clicked()
+                    {
+                        self.data_frame = DataFrame::empty();
+                    }
+                });
                 ui.separator();
                 ui.toggle_value(&mut self.control.open, RichText::new(GEAR).heading())
                     .on_hover_text(localize!("settings"));
@@ -125,7 +113,13 @@ impl Pane {
     pub(crate) fn content(&mut self, ui: &mut Ui) {
         ui.separator();
         self.control.windows(ui);
-        TableView::new(&mut self.data_frame, &self.control.settings).ui(ui);
+        if let Some(Event::DeleteRow(row)) =
+            TableView::new(&mut self.data_frame, &self.control.settings).ui(ui)
+        {
+            if let Err(error) = self.delete_row(row) {
+                error!(%error);
+            }
+        }
     }
 
     pub(super) fn hash(&self) -> u64 {

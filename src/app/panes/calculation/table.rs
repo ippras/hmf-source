@@ -1,17 +1,16 @@
 use super::control::Settings;
-use crate::{
-    app::{
-        MARGIN,
-        computers::{CalculationComputed, CalculationKey},
-        widgets::{FattyAcidWidget, FloatWidget},
-    },
+use crate::app::{
+    MARGIN,
+    computers::{CalculationComputed, CalculationKey},
+    widgets::{FattyAcidWidget, FloatWidget},
 };
+use egui::{Frame, Id, Margin, Response, Separator, Stroke, TextStyle, TextWrapMode, Ui};
+use egui_phosphor::regular::MINUS;
+use egui_table::{AutoSizeMode, CellInfo, Column, HeaderCellInfo, HeaderRow, Table, TableDelegate};
 use fatty_acid::fatty_acid::{
     FattyAcid,
-    polars::{DataFrameExt as _, series::SeriesExt as _},
+    polars::{DataFrameExt as _, SeriesExt as _},
 };
-use egui::{Frame, Id, Margin, Response, TextStyle, TextWrapMode, Ui};
-use egui_table::{AutoSizeMode, CellInfo, Column, HeaderCellInfo, HeaderRow, Table, TableDelegate};
 use polars::{chunked_array::builder::AnonymousOwnedListBuilder, prelude::*};
 use std::{borrow::Cow, ops::Range};
 
@@ -33,26 +32,26 @@ const MIDDLE: &[Range<usize>] = &[
 ];
 
 /// Table view
-pub(crate) struct TableView<'a> {
+pub(super) struct TableView<'a> {
     source: &'a mut DataFrame,
     target: DataFrame,
     settings: &'a Settings,
-    changed: bool,
+    event: Option<Event>,
 }
 
 impl<'a> TableView<'a> {
-    pub(crate) fn new(data_frame: &'a mut DataFrame, settings: &'a Settings) -> Self {
+    pub(super) fn new(data_frame: &'a mut DataFrame, settings: &'a Settings) -> Self {
         Self {
             source: data_frame,
             target: DataFrame::empty(),
             settings,
-            changed: false,
+            event: None,
         }
     }
 }
 
 impl TableView<'_> {
-    pub(crate) fn ui(&mut self, ui: &mut Ui) {
+    pub(super) fn ui(&mut self, ui: &mut Ui) -> Option<Event> {
         self.target = ui.memory_mut(|memory| {
             memory
                 .caches
@@ -87,6 +86,7 @@ impl TableView<'_> {
             ])
             .auto_size_mode(AutoSizeMode::OnParentResize)
             .show(ui, self);
+        self.event
     }
 
     fn header_cell_content_ui(&mut self, ui: &mut Ui, row: usize, column: usize) {
@@ -158,11 +158,13 @@ impl TableView<'_> {
     }
 
     fn body_cell_content_ui(&mut self, ui: &mut Ui, row: usize, column: usize) -> PolarsResult<()> {
-        if self.changed {
-            return Ok(());
-        }
         match (row, column) {
             (row, 0) => {
+                if self.settings.editable {
+                    if ui.button(MINUS).clicked() {
+                        self.event = Some(Event::DeleteRow(row));
+                    }
+                }
                 let indices = self.target["Index"].u32()?;
                 let index = indices.get(row).unwrap();
                 ui.label(index.to_string());
@@ -355,7 +357,7 @@ impl TableDelegate for TableView<'_> {
     }
 
     fn cell_ui(&mut self, ui: &mut Ui, cell: &CellInfo) {
-        if cell.row_nr % 2 == 1 {
+        if cell.row_nr % 2 == 0 {
             ui.painter()
                 .rect_filled(ui.max_rect(), 0.0, ui.visuals().faint_bg_color);
         }
@@ -366,6 +368,12 @@ impl TableDelegate for TableView<'_> {
                     .unwrap()
             });
     }
+}
+
+/// Event
+#[derive(Clone, Copy, Debug)]
+pub(super) enum Event {
+    DeleteRow(usize),
 }
 
 fn change_fatty_acid(

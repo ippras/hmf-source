@@ -25,7 +25,7 @@ use egui_phosphor::{
     },
 };
 use egui_tiles::{ContainerKind, Tile, Tree};
-use egui_tiles_ext::{TAB, TilesExt as _, TreeExt as _};
+use egui_tiles_ext::{TilesExt as _, TreeExt as _, VERTICAL};
 use serde::{Deserialize, Serialize};
 use std::{
     borrow::BorrowMut,
@@ -268,7 +268,7 @@ impl App {
                             .clicked()
                         {
                             self.tree
-                                .insert_pane::<TAB>(Pane::init(HMF_1.clone(), "HMF-1"));
+                                .insert_pane::<VERTICAL>(Pane::init(HMF_1.clone(), "HMF-1"));
                             ui.close_menu();
                         }
                         if ui
@@ -276,7 +276,7 @@ impl App {
                             .clicked()
                         {
                             self.tree
-                                .insert_pane::<TAB>(Pane::init(HMF_2.clone(), "HMF-2"));
+                                .insert_pane::<VERTICAL>(Pane::init(HMF_2.clone(), "HMF-2"));
                             ui.close_menu();
                         }
                         if ui
@@ -284,7 +284,7 @@ impl App {
                             .clicked()
                         {
                             self.tree
-                                .insert_pane::<TAB>(Pane::init(HMF_3.clone(), "HMF-3"));
+                                .insert_pane::<VERTICAL>(Pane::init(HMF_3.clone(), "HMF-3"));
                             ui.close_menu();
                         }
                         if ui
@@ -292,7 +292,7 @@ impl App {
                             .clicked()
                         {
                             self.tree
-                                .insert_pane::<TAB>(Pane::init(HMF_4.clone(), "HMF-4"));
+                                .insert_pane::<VERTICAL>(Pane::init(HMF_4.clone(), "HMF-4"));
                             ui.close_menu();
                         }
                         ui.separator();
@@ -301,7 +301,7 @@ impl App {
                             .clicked()
                         {
                             self.tree
-                                .insert_pane::<TAB>(Pane::init(CV_15.clone(), "CV-15"));
+                                .insert_pane::<VERTICAL>(Pane::init(CV_15.clone(), "CV-15"));
                             ui.close_menu();
                         }
                         if ui
@@ -309,7 +309,7 @@ impl App {
                             .clicked()
                         {
                             self.tree
-                                .insert_pane::<TAB>(Pane::init(CZ_30412.clone(), "CZ-30412"));
+                                .insert_pane::<VERTICAL>(Pane::init(CZ_30412.clone(), "CZ-30412"));
                             ui.close_menu();
                         }
                         if ui
@@ -317,7 +317,7 @@ impl App {
                             .clicked()
                         {
                             self.tree
-                                .insert_pane::<TAB>(Pane::init(CP_9.clone(), "CP-9"));
+                                .insert_pane::<VERTICAL>(Pane::init(CP_9.clone(), "CP-9"));
                             ui.close_menu();
                         }
                         if ui
@@ -325,7 +325,7 @@ impl App {
                             .clicked()
                         {
                             self.tree
-                                .insert_pane::<TAB>(Pane::init(CV_395.clone(), "CV-395"));
+                                .insert_pane::<VERTICAL>(Pane::init(CV_395.clone(), "CV-395"));
                             ui.close_menu();
                         }
                         //
@@ -334,7 +334,7 @@ impl App {
                             .clicked()
                         {
                             self.tree
-                                .insert_pane::<TAB>(Pane::init(ISO_FJ.clone(), "ISO-FJ"));
+                                .insert_pane::<VERTICAL>(Pane::init(ISO_FJ.clone(), "ISO-FJ"));
                             ui.close_menu();
                         }
                         ui.separator();
@@ -342,8 +342,10 @@ impl App {
                             .button(RichText::new(format!("{DATABASE} C70-Control")).heading())
                             .clicked()
                         {
-                            self.tree
-                                .insert_pane::<TAB>(Pane::init(C70_CONTROL.clone(), "C70-Control"));
+                            self.tree.insert_pane::<VERTICAL>(Pane::init(
+                                C70_CONTROL.clone(),
+                                "C70-Control",
+                            ));
                             ui.close_menu();
                         }
                         if ui
@@ -351,7 +353,7 @@ impl App {
                             .clicked()
                         {
                             self.tree
-                                .insert_pane::<TAB>(Pane::init(C70_H2O2.clone(), "C70-H2O2"));
+                                .insert_pane::<VERTICAL>(Pane::init(C70_H2O2.clone(), "C70-H2O2"));
                             ui.close_menu();
                         }
                         if ui
@@ -359,13 +361,13 @@ impl App {
                             .clicked()
                         {
                             self.tree
-                                .insert_pane::<TAB>(Pane::init(C70_NACL.clone(), "C70-NaCl"));
+                                .insert_pane::<VERTICAL>(Pane::init(C70_NACL.clone(), "C70-NaCl"));
                             ui.close_menu();
                         }
                     });
                     // Create
                     if ui.button(RichText::new(PLUS).size(SIZE)).clicked() {
-                        self.tree.insert_pane::<TAB>(Pane::new());
+                        self.tree.insert_pane::<VERTICAL>(Pane::new());
                     }
                     ui.separator();
                     // About
@@ -467,7 +469,8 @@ impl App {
             match ron::de::from_str(&content) {
                 Ok(data_frame) => {
                     trace!(?data_frame);
-                    self.tree.insert_pane::<TAB>(Pane::init(data_frame, name));
+                    self.tree
+                        .insert_pane::<VERTICAL>(Pane::init(data_frame, name));
                 }
                 Err(error) => error!(%error),
             };
