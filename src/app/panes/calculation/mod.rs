@@ -5,11 +5,14 @@ use self::{
 use crate::localization::localize;
 use anyhow::Result;
 use egui::{RichText, ScrollArea, TextEdit, Ui, menu::bar};
-use egui_phosphor::regular::{ARROWS_HORIZONTAL, FLOPPY_DISK, GEAR, MINUS, PENCIL, PLUS, TAG};
+use egui_phosphor::regular::{
+    ARROWS_HORIZONTAL, FLOPPY_DISK, GEAR, MINUS, PENCIL, PLUS, TAG, TRASH,
+};
 use polars::prelude::*;
 use ron::{extensions::Extensions, ser::PrettyConfig};
 use serde::{Deserialize, Serialize};
 use tracing::error;
+use tracing_subscriber::registry::Data;
 
 /// Calculation pane
 #[derive(Default, Deserialize, Serialize)]
@@ -51,16 +54,6 @@ impl Pane {
         ui.separator();
         bar(ui, |ui| {
             ScrollArea::horizontal().show(ui, |ui| {
-                ui.toggle_value(
-                    &mut self.control.settings.resizable,
-                    RichText::new(ARROWS_HORIZONTAL).heading(),
-                )
-                .on_hover_text(localize!("resize"));
-                ui.toggle_value(
-                    &mut self.control.settings.editable,
-                    RichText::new(PENCIL).heading(),
-                )
-                .on_hover_text(localize!("edit"));
                 ui.menu_button(RichText::new(TAG).heading(), |ui| {
                     ui.horizontal(|ui| {
                         ui.add(
@@ -71,7 +64,26 @@ impl Pane {
                 })
                 .response
                 .on_hover_text(localize!("label"));
+                ui.toggle_value(
+                    &mut self.control.settings.resizable,
+                    RichText::new(ARROWS_HORIZONTAL).heading(),
+                )
+                .on_hover_text(localize!("resize"));
+                ui.toggle_value(
+                    &mut self.control.settings.editable,
+                    RichText::new(PENCIL).heading(),
+                )
+                .on_hover_text(localize!("edit"));
                 ui.separator();
+                // Add
+                if ui
+                    .button(RichText::new(PLUS).heading())
+                    .on_hover_text(localize!("add"))
+                    .clicked()
+                {
+                    self.add_row().unwrap();
+                }
+                // Delete
                 ui.add_enabled_ui(!self.data_frame.is_empty(), |ui| {
                     ui.menu_button(RichText::new(MINUS).heading(), |ui| {
                         for index in 0..self.data_frame.height() {
@@ -84,12 +96,13 @@ impl Pane {
                         }
                     });
                 });
+                // Clear
                 if ui
-                    .button(RichText::new(PLUS).heading())
-                    .on_hover_text(localize!("add"))
+                    .button(RichText::new(TRASH).heading())
+                    .on_hover_text(localize!("clear"))
                     .clicked()
                 {
-                    self.add_row().unwrap();
+                    self.data_frame = DataFrame::empty();
                 }
                 ui.separator();
                 ui.toggle_value(&mut self.control.open, RichText::new(GEAR).heading())

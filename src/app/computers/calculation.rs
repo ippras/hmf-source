@@ -1,4 +1,4 @@
-use crate::{app::panes::calculation::control::Settings, special::mature_milk::MATURE_MILK};
+use crate::{app::panes::calculation::control::Settings, presets::MATURE_MILK};
 use egui::util::cache::{ComputerMut, FrameCache};
 use polars::prelude::*;
 use std::hash::{Hash, Hasher};

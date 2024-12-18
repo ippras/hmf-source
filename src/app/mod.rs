@@ -20,17 +20,16 @@ use egui_notify::Toasts;
 use egui_phosphor::{
     Variant, add_to_fonts,
     regular::{
-        ARROWS_CLOCKWISE, ARROWS_HORIZONTAL, DATABASE, GEAR, GRID_FOUR, INFO, PENCIL, PLUS,
+        ARROWS_CLOCKWISE, ARROWS_HORIZONTAL, DATABASE, GRID_FOUR, INFO, PENCIL, PLUS,
         SQUARE_SPLIT_HORIZONTAL, SQUARE_SPLIT_VERTICAL, TABS, TRASH,
     },
 };
-use egui_tiles::{Container, ContainerKind, Tile, TileId, Tiles, Tree};
-use egui_tiles_ext::{ContainerExt as _, TAB, TilesExt as _, TreeExt as _};
+use egui_tiles::{ContainerKind, Tile, Tree};
+use egui_tiles_ext::{TAB, TilesExt as _, TreeExt as _};
 use serde::{Deserialize, Serialize};
 use std::{
     borrow::BorrowMut,
     fmt::Write,
-    iter::once,
     mem::take,
     str,
     sync::mpsc::{Receiver, Sender, channel},

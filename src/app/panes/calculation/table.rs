@@ -5,10 +5,10 @@ use crate::{
         computers::{CalculationComputed, CalculationKey},
         widgets::{FattyAcidWidget, FloatWidget},
     },
-    special::{
-        fatty_acid::FattyAcid,
-        polars::{DataFrameExt as _, series::SeriesExt as _},
-    },
+};
+use fatty_acid::fatty_acid::{
+    FattyAcid,
+    polars::{DataFrameExt as _, series::SeriesExt as _},
 };
 use egui::{Frame, Id, Margin, Response, TextStyle, TextWrapMode, Ui};
 use egui_table::{AutoSizeMode, CellInfo, Column, HeaderCellInfo, HeaderRow, Table, TableDelegate};

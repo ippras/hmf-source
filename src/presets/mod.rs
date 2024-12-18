@@ -1,3 +1,5 @@
+pub(crate) use self::mature_milk::MATURE_MILK;
+
 use polars::prelude::*;
 use std::sync::LazyLock;
 
@@ -41,3 +43,5 @@ pub(crate) static C70_H2O2: LazyLock<DataFrame> = LazyLock::new(|| {
 pub(crate) static C70_NACL: LazyLock<DataFrame> = LazyLock::new(|| {
     ron::de::from_str(include_str!("C70-NaCl.hmf.ron")).expect("deserialize C70-NaCl.hmf.ron")
 });
+
+mod mature_milk;

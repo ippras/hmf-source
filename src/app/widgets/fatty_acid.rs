@@ -1,9 +1,10 @@
-use crate::special::{
-    fatty_acid::{COMMON, DisplayWithOptions, FattyAcid},
-    mature_milk::MATURE_MILK,
+use crate::presets::MATURE_MILK;
+use egui::{ComboBox, InnerResponse, Ui};
+use fatty_acid::fatty_acid::{
+    FattyAcid,
+    display::{COMMON, DisplayWithOptions},
     polars::DataFrameExt as _,
 };
-use egui::{ComboBox, InnerResponse, Ui};
 use polars::prelude::*;
 
 /// Fatty acid widget
@@ -49,7 +50,7 @@ impl<'a> FattyAcidWidget<'a> {
                     let mature_milk = MATURE_MILK.fatty_acid();
                     for index in 0..mature_milk.len() {
                         if let Some(selected_value) = mature_milk.get(index)? {
-                            let text = format!("{:#}", selected_value.display(COMMON));
+                            let text = format!("{:#}", (&selected_value).display(COMMON));
                             if ui
                                 .selectable_value(current_value, selected_value, text)
                                 .changed()
