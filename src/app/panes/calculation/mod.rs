@@ -4,7 +4,7 @@ use self::{
 };
 use crate::localization::localize;
 use anyhow::Result;
-use egui::{RichText, ScrollArea, TextEdit, Ui, menu::bar};
+use egui::{RichText, ScrollArea, TextEdit, Ui, Widget, menu::bar};
 use egui_phosphor::regular::{ARROWS_HORIZONTAL, FLOPPY_DISK, GEAR, PENCIL, PLUS, TAG, TRASH};
 use polars::prelude::*;
 use ron::{extensions::Extensions, ser::PrettyConfig};
@@ -53,10 +53,9 @@ impl Pane {
             ScrollArea::horizontal().show(ui, |ui| {
                 ui.menu_button(RichText::new(TAG).heading(), |ui| {
                     ui.horizontal(|ui| {
-                        ui.add(
-                            TextEdit::singleline(&mut self.control.settings.label)
-                                .hint_text("File name"),
-                        );
+                        TextEdit::singleline(&mut self.control.settings.label)
+                            .hint_text("File name")
+                            .ui(ui);
                     });
                 })
                 .response

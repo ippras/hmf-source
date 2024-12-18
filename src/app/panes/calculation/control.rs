@@ -1,6 +1,8 @@
 use crate::{app::MAX_PRECISION, localization::localize};
-use egui::{Grid, Slider, Ui, Window};
-use egui_phosphor::regular::GEAR;
+use egui::{Grid, Slider, Ui, Widget, Window};
+use egui_phosphor::regular::{
+    ARROWS_HORIZONTAL, FLOPPY_DISK, GEAR, MINUS, PENCIL, PLUS, TAG, TRASH,
+};
 use serde::{Deserialize, Serialize};
 
 /// Calculation control
@@ -63,7 +65,7 @@ impl Settings {
         Grid::new(ui.next_auto_id()).show(ui, |ui| {
             // Precision
             ui.label(localize!("precision"));
-            ui.add(Slider::new(&mut self.precision, 0..=MAX_PRECISION));
+            Slider::new(&mut self.precision, 0..=MAX_PRECISION).ui(ui);
             ui.end_row();
 
             ui.separator();
@@ -72,7 +74,8 @@ impl Settings {
 
             // Round
             ui.label(localize!("round"));
-            ui.add(Slider::new(&mut self.round, 0..=MAX_PRECISION as _))
+            Slider::new(&mut self.round, 0..=MAX_PRECISION as _)
+                .ui(ui)
                 .on_hover_text(localize!("round_description"));
             ui.end_row();
 

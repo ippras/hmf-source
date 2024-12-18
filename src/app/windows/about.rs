@@ -1,5 +1,5 @@
 use crate::app::SIZE;
-use egui::{Context, Id, Label, RichText, Sense, Window};
+use egui::{Context, Id, Label, RichText, Sense, Widget, Window};
 use egui_phosphor::regular::{COPYRIGHT, GITHUB_LOGO, GLOBE, INFO, WARNING};
 
 /// About
@@ -33,11 +33,11 @@ impl About {
                     ui.label(format!("HMF {version}"));
                     ui.label("Human Milk Fat matching");
                     ui.label(COPYRIGHT);
-                    ui.add(Label::new("Giorgi Kazakov").sense(Sense::click()));
+                    Label::new("Giorgi Kazakov").sense(Sense::click()).ui(ui);
                     let id = Id::new("counter");
                     let counter =
                         ui.data_mut(|data| data.get_temp::<usize>(id).unwrap_or_default());
-                    let mut response = ui.add(Label::new("Roman Sidorov").sense(Sense::click()));
+                    let mut response = Label::new("Roman Sidorov").sense(Sense::click()).ui(ui);
                     if counter > 42 {
                         response = response.on_hover_text("♥ лучший котик в мире");
                     }

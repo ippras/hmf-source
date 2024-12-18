@@ -1,6 +1,6 @@
 [package]
 name = "hmf"
-version = "0.0.12"
+version = "0.0.13"
 edition = "2024"
 
 [dependencies]
@@ -26,22 +26,15 @@ fluent_content = "0.0.5"
 intl-memoizer = "0.5.2"
 log = "0.4.22"
 polars = { version = "0.45.1", default-features = false, features = [
-    # "abs",
-    # "cross_join",
     "dtype-categorical",
     "dtype-i8",
     "dtype-struct",
     "dtype-u8",
     "lazy",
-    # "list_eval",
     "round_series",
-    "serde-lazy",
+    # "serde-lazy",
     "fmt_no_tty",
     #
-    # "strings",
-    # "concat_str",
-    # "regex",
-    # "list_any_all",
 ] }
 ron = "0.8.1"
 serde = { version = "1.0.216", features = ["derive", "std"] }

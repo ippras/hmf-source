@@ -4,7 +4,7 @@ use crate::app::{
     computers::{CalculationComputed, CalculationKey},
     widgets::{FattyAcidWidget, FloatWidget},
 };
-use egui::{Frame, Id, Margin, Response, Separator, Stroke, TextStyle, TextWrapMode, Ui};
+use egui::{Frame, Id, Margin, Response, TextStyle, TextWrapMode, Ui};
 use egui_phosphor::regular::MINUS;
 use egui_table::{AutoSizeMode, CellInfo, Column, HeaderCellInfo, HeaderRow, Table, TableDelegate};
 use fatty_acid::fatty_acid::{
@@ -170,6 +170,17 @@ impl TableView<'_> {
                 ui.label(index.to_string());
             }
             (row, 1) => {
+                let inner_response =
+                    crate::app::widgets::new_fatty_acid::FattyAcidWidget::new(|| {
+                        self.source.fatty_acid().get(row)
+                    })
+                    .editable(self.settings.editable)
+                    .hover()
+                    .ui(ui)?;
+                if let Some(value) = inner_response.inner {
+                    self.source
+                        .try_apply("FattyAcid", change_fatty_acid(row, &value))?;
+                }
                 let changed = FattyAcidWidget::new(|| self.source.fatty_acid().get(row))
                     .editable(self.settings.editable)
                     .hover()
