@@ -1,7 +1,7 @@
 use super::control::Settings;
 use crate::app::{
     MARGIN,
-    computers::{CalculationComputed, CalculationKey},
+    computers::{CalculationComputed, CalculationKey, CompositionComputed, CompositionKey},
     widgets::{FloatWidget, new_fatty_acid::FattyAcidWidget},
 };
 use egui::{Frame, Id, Margin, Response, TextStyle, TextWrapMode, Ui};
@@ -57,6 +57,15 @@ impl TableView<'_> {
                 .caches
                 .cache::<CalculationComputed>()
                 .get(CalculationKey {
+                    data_frame: self.source,
+                    settings: self.settings,
+                })
+        });
+        let data_frame = ui.memory_mut(|memory| {
+            memory
+                .caches
+                .cache::<CompositionComputed>()
+                .get(CompositionKey {
                     data_frame: self.source,
                     settings: self.settings,
                 })
