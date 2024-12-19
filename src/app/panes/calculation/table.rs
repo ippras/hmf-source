@@ -2,17 +2,17 @@ use super::control::Settings;
 use crate::app::{
     MARGIN,
     computers::{CalculationComputed, CalculationKey},
-    widgets::{FattyAcidWidget, FloatWidget},
+    widgets::{FloatWidget, new_fatty_acid::FattyAcidWidget},
 };
 use egui::{Frame, Id, Margin, Response, TextStyle, TextWrapMode, Ui};
 use egui_phosphor::regular::MINUS;
 use egui_table::{AutoSizeMode, CellInfo, Column, HeaderCellInfo, HeaderRow, Table, TableDelegate};
-use fatty_acid::fatty_acid::{
+use lipid::fatty_acid::{
     FattyAcid,
     polars::{DataFrameExt as _, SeriesExt as _},
 };
 use polars::{chunked_array::builder::AnonymousOwnedListBuilder, prelude::*};
-use std::{borrow::Cow, ops::Range};
+use std::ops::Range;
 
 const ID: Range<usize> = 0..2;
 const EXPERIMENTAL: Range<usize> = ID.end..ID.end + 2;
@@ -158,8 +158,8 @@ impl TableView<'_> {
     }
 
     fn body_cell_content_ui(&mut self, ui: &mut Ui, row: usize, column: usize) -> PolarsResult<()> {
-        match (row, column) {
-            (row, 0) => {
+        match (row, column..column + 1) {
+            (row, id::INDEX) => {
                 if self.settings.editable {
                     if ui.button(MINUS).clicked() {
                         self.event = Some(Event::DeleteRow(row));
@@ -169,11 +169,8 @@ impl TableView<'_> {
                 let index = indices.get(row).unwrap();
                 ui.label(index.to_string());
             }
-            (row, 1) => {
-                let inner_response =
-                    crate::app::widgets::new_fatty_acid::FattyAcidWidget::new(|| {
-                        self.source.fatty_acid().get(row)
-                    })
+            (row, id::FA) => {
+                let inner_response = FattyAcidWidget::new(|| self.source.fatty_acid().get(row))
                     .editable(self.settings.editable)
                     .hover()
                     .ui(ui)?;
@@ -181,82 +178,168 @@ impl TableView<'_> {
                     self.source
                         .try_apply("FattyAcid", change_fatty_acid(row, &value))?;
                 }
-                let changed = FattyAcidWidget::new(|| self.source.fatty_acid().get(row))
-                    .editable(self.settings.editable)
-                    .hover()
-                    .ui(ui)
-                    .inner;
-                if let Some(value) = changed {
-                    self.source
-                        .try_apply("FattyAcid", change_fatty_acid(row, &value))?;
-                }
+                // let changed = FattyAcidWidget::new(|| self.source.fatty_acid().get(row))
+                //     .editable(self.settings.editable)
+                //     .hover()
+                //     .ui(ui)
+                //     .inner;
+                // if let Some(value) = changed {
+                //     self.source
+                //         .try_apply("FattyAcid", change_fatty_acid(row, &value))?;
+                // }
             }
-            (row, 2) => {
-                self.experimental(ui, row, "TAG")?;
+            (row, experimental::TAG123) => {
+                self.rw(ui, row, "TAG")?;
             }
-            (row, 3) => {
-                self.experimental(ui, row, "MAG")?;
+            (row, experimental::MAG2) => {
+                self.rw(ui, row, "MAG")?;
             }
-            (row, 4) => {
-                self.calculated(ui, row, "SN123", &["A", "Value"])?
-                    .on_hover_ui(|ui| {
-                        ui.horizontal(|ui| {
-                            FloatWidget::new(|| {
-                                Ok(self.target["SN123"]
-                                    .struct_()?
-                                    .field_by_name("A")?
-                                    .struct_()?
-                                    .field_by_name("Min")?
-                                    .f64()?
-                                    .get(row))
-                            })
-                            .ui(ui);
-                            ui.label("-");
-                            FloatWidget::new(|| {
-                                Ok(self.target["SN123"]
-                                    .struct_()?
-                                    .field_by_name("A")?
-                                    .struct_()?
-                                    .field_by_name("Max")?
-                                    .f64()?
-                                    .get(row))
-                            })
-                            .ui(ui);
-                        });
+            (row, calculated::sn123::A) => {
+                self.ro(ui, || {
+                    Ok(self.target["SN123"]
+                        .struct_()?
+                        .field_by_name("A")?
+                        .struct_()?
+                        .field_by_name("Value")?
+                        .f64()?
+                        .get(row))
+                })?
+                .on_hover_ui(|ui| {
+                    ui.horizontal(|ui| {
+                        FloatWidget::new(|| {
+                            Ok(self.target["SN123"]
+                                .struct_()?
+                                .field_by_name("A")?
+                                .struct_()?
+                                .field_by_name("Min")?
+                                .f64()?
+                                .get(row))
+                        })
+                        .ui(ui);
+                        ui.label("-");
+                        FloatWidget::new(|| {
+                            Ok(self.target["SN123"]
+                                .struct_()?
+                                .field_by_name("A")?
+                                .struct_()?
+                                .field_by_name("Max")?
+                                .f64()?
+                                .get(row))
+                        })
+                        .ui(ui);
                     });
+                });
             }
-            (row, 5) => {
-                self.calculated(ui, row, "SN123", &["B"])?;
+            (row, calculated::sn123::B) => {
+                self.ro(ui, || {
+                    Ok(self.target["SN123"]
+                        .struct_()?
+                        .field_by_name("B")?
+                        .f64()?
+                        .get(row))
+                })?;
             }
-            (row, 6) => {
-                self.calculated(ui, row, "SN123", &["C"])?;
+            (row, calculated::sn123::C) => {
+                self.ro(ui, || {
+                    Ok(self.target["SN123"]
+                        .struct_()?
+                        .field_by_name("C")?
+                        .f64()?
+                        .get(row))
+                })?;
             }
-            (row, 7) => {
-                self.calculated(ui, row, "SN123", &["D"])?;
+            (row, calculated::sn123::D) => {
+                self.ro(ui, || {
+                    Ok(self.target["SN123"]
+                        .struct_()?
+                        .field_by_name("D")?
+                        .f64()?
+                        .get(row))
+                })?;
             }
-            (row, 8) => {
-                self.calculated(ui, row, "SN123", &["E"])?;
+            (row, calculated::sn123::E) => {
+                self.ro(ui, || {
+                    Ok(self.target["SN123"]
+                        .struct_()?
+                        .field_by_name("E")?
+                        .f64()?
+                        .get(row))
+                })?;
             }
-            (row, 9) => {
-                self.calculated(ui, row, "SN2", &["A"])?;
+            (row, calculated::sn2::A) => {
+                self.ro(ui, || {
+                    Ok(self.target["SN2"]
+                        .struct_()?
+                        .field_by_name("A")?
+                        .struct_()?
+                        .field_by_name("Value")?
+                        .f64()?
+                        .get(row))
+                })?
+                .on_hover_ui(|ui| {
+                    ui.horizontal(|ui| {
+                        FloatWidget::new(|| {
+                            Ok(self.target["SN2"]
+                                .struct_()?
+                                .field_by_name("A")?
+                                .struct_()?
+                                .field_by_name("Min")?
+                                .f64()?
+                                .get(row))
+                        })
+                        .ui(ui);
+                        ui.label("-");
+                        FloatWidget::new(|| {
+                            Ok(self.target["SN2"]
+                                .struct_()?
+                                .field_by_name("A")?
+                                .struct_()?
+                                .field_by_name("Max")?
+                                .f64()?
+                                .get(row))
+                        })
+                        .ui(ui);
+                    });
+                });
             }
-            (row, 10) => {
-                self.calculated(ui, row, "SN2", &["B"])?;
+            (row, calculated::sn2::B) => {
+                self.ro(ui, || {
+                    Ok(self.target["SN2"]
+                        .struct_()?
+                        .field_by_name("B")?
+                        .f64()?
+                        .get(row))
+                })?;
             }
-            (row, 11) => {
-                self.calculated(ui, row, "SN2", &["C"])?;
+            (row, calculated::sn2::C) => {
+                self.ro(ui, || {
+                    Ok(self.target["SN2"]
+                        .struct_()?
+                        .field_by_name("C")?
+                        .f64()?
+                        .get(row))
+                })?;
             }
-            (row, 12) => {
-                self.calculated(ui, row, "SN2", &["D"])?;
+            (row, calculated::sn2::D) => {
+                self.ro(ui, || {
+                    Ok(self.target["SN2"]
+                        .struct_()?
+                        .field_by_name("D")?
+                        .f64()?
+                        .get(row))
+                })?;
             }
-            (row, 13) => {
-                self.calculated(ui, row, "SN2", &["E"])?;
+            (row, calculated::sn2::E) => {
+                self.ro(ui, || {
+                    Ok(self.target["SN2"]
+                        .struct_()?
+                        .field_by_name("E")?
+                        .f64()?
+                        .get(row))
+                })?;
             }
-            (row, 14) => {
-                FloatWidget::new(|| Ok(self.target["F"].f64()?.get(row)))
-                    .precision(Some(self.settings.precision))
-                    .hover()
-                    .ui(ui);
+            (row, calculated::F) => {
+                self.ro(ui, || Ok(self.target["F"].f64()?.get(row)))?;
             }
             _ => {} // _ => unreachable!(),
         }
@@ -264,8 +347,8 @@ impl TableView<'_> {
     }
 
     fn footer_cell_content_ui(&mut self, ui: &mut Ui, column: usize) -> PolarsResult<()> {
-        match column {
-            2 => {
+        match column..column + 1 {
+            experimental::TAG123 => {
                 FloatWidget::new(|| Ok(self.source["TAG"].f64()?.sum()))
                     .precision(Some(self.settings.precision))
                     .hover()
@@ -273,7 +356,7 @@ impl TableView<'_> {
                     .response
                     .on_hover_text("∑TAG");
             }
-            3 => {
+            experimental::MAG2 => {
                 FloatWidget::new(|| Ok(self.source["MAG"].f64()?.sum()))
                     .precision(Some(self.settings.precision))
                     .hover()
@@ -281,7 +364,7 @@ impl TableView<'_> {
                     .response
                     .on_hover_text("∑MAG");
             }
-            8 => {
+            calculated::sn123::E => {
                 FloatWidget::new(|| {
                     Ok(self.target["SN123"]
                         .struct_()?
@@ -296,7 +379,7 @@ impl TableView<'_> {
                 .response
                 .on_hover_text("50 - ∑E");
             }
-            13 => {
+            calculated::sn2::E => {
                 FloatWidget::new(|| {
                     Ok(self.target["SN2"]
                         .struct_()?
@@ -311,7 +394,7 @@ impl TableView<'_> {
                 .response
                 .on_hover_text("50 - ∑E");
             }
-            14 => {
+            calculated::F => {
                 FloatWidget::new(|| Ok(self.target["F"].f64()?.sum().map(|f| 100.0 - f)))
                     .precision(Some(self.settings.precision))
                     .hover()
@@ -324,7 +407,7 @@ impl TableView<'_> {
         Ok(())
     }
 
-    fn experimental(&mut self, ui: &mut Ui, row: usize, column: &str) -> PolarsResult<Response> {
+    fn rw(&mut self, ui: &mut Ui, row: usize, column: &str) -> PolarsResult<Response> {
         let inner_response = FloatWidget::new(|| Ok(self.source[column].f64()?.get(row)))
             .editable(self.settings.editable)
             .precision(Some(self.settings.precision))
@@ -337,24 +420,12 @@ impl TableView<'_> {
         Ok(inner_response.response)
     }
 
-    fn calculated(
-        &mut self,
-        ui: &mut Ui,
-        row: usize,
-        column: &str,
-        fields: &[&str],
-    ) -> PolarsResult<Response> {
-        Ok(FloatWidget::new(|| {
-            let mut series = Cow::Borrowed(self.target[column].as_materialized_series());
-            for field in fields {
-                series = Cow::Owned(series.struct_()?.field_by_name(field)?);
-            }
-            Ok(series.f64()?.get(row))
-        })
-        .precision(Some(self.settings.precision))
-        .hover()
-        .ui(ui)
-        .response)
+    fn ro(&self, ui: &mut Ui, f: impl Fn() -> PolarsResult<Option<f64>>) -> PolarsResult<Response> {
+        Ok(FloatWidget::new(f)
+            .precision(Some(self.settings.precision))
+            .hover()
+            .ui(ui)
+            .response)
     }
 }
 
@@ -516,9 +587,23 @@ mod calculated {
     pub(super) const SN2: Range<usize> = SN123.end..SN123.end + 5;
     pub(super) const F: Range<usize> = SN2.end..SN2.end + 1;
 
-    pub(super) const _A: Range<usize> = CALCULATED.start..CALCULATED.start + 1;
-    pub(super) const _B: Range<usize> = _A.end.._A.end + 1;
-    pub(super) const _C: Range<usize> = _B.end.._B.end + 1;
-    pub(super) const _D: Range<usize> = _C.end.._C.end + 1;
-    pub(super) const _E: Range<usize> = _D.end.._D.end + 1;
+    pub(super) mod sn123 {
+        use super::*;
+
+        pub(in super::super) const A: Range<usize> = SN123.start..SN123.start + 1;
+        pub(in super::super) const B: Range<usize> = A.end..A.end + 1;
+        pub(in super::super) const C: Range<usize> = B.end..B.end + 1;
+        pub(in super::super) const D: Range<usize> = C.end..C.end + 1;
+        pub(in super::super) const E: Range<usize> = D.end..D.end + 1;
+    }
+
+    pub(super) mod sn2 {
+        use super::*;
+
+        pub(in super::super) const A: Range<usize> = SN2.start..SN2.start + 1;
+        pub(in super::super) const B: Range<usize> = A.end..A.end + 1;
+        pub(in super::super) const C: Range<usize> = B.end..B.end + 1;
+        pub(in super::super) const D: Range<usize> = C.end..C.end + 1;
+        pub(in super::super) const E: Range<usize> = D.end..D.end + 1;
+    }
 }

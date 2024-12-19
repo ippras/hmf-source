@@ -1,6 +1,6 @@
-use egui::{Align, DragValue, Grid, InnerResponse, Layout, Ui, Widget};
-use fatty_acid::fatty_acid::{
-    FattyAcid, Isomerism, Unsaturation,
+use egui::{Align, DragValue, Grid, InnerResponse, Layout, Ui, Widget, vec2};
+use lipid::fatty_acid::{
+    FattyAcid, FattyAcidExt as _, Isomerism, Unsaturation,
     display::{COMMON, DisplayWithOptions},
 };
 use polars::prelude::*;
@@ -43,25 +43,29 @@ impl FattyAcidWidget<'_> {
         };
         let mut inner = None;
         let mut response = if self.editable {
-            ui.menu_button(text, |ui| {
-                let mut fatty_acid = fatty_acid.unwrap_or_default();
-                Grid::new(ui.next_auto_id()).show(ui, |ui| {
-                    // Carbons
-                    ui.label("Carbons");
-                    if DragValue::new(&mut fatty_acid.carbons).ui(ui).changed() {
-                        inner = Some(take(&mut fatty_acid));
-                    }
-                    ui.end_row();
+            ui.add_sized(
+                vec2(ui.available_width(), ui.style().spacing.interact_size.y),
+                |ui: &mut Ui| {
+                    ui.menu_button(text, |ui| {
+                        let mut fatty_acid = fatty_acid.unwrap_or_default();
+                        Grid::new(ui.next_auto_id()).show(ui, |ui| {
+                            // Carbons
+                            ui.label("Carbons");
+                            if DragValue::new(&mut fatty_acid.carbons).ui(ui).changed() {
+                                inner = Some(take(&mut fatty_acid));
+                            }
+                            ui.end_row();
 
-                    // Unsaturated
-                    ui.collapsing("Unsaturated", |ui| {
-                        let bounds = fatty_acid.bounds();
-                        let mut changed = false;
-                        for unsaturated in &mut fatty_acid.unsaturated {
-                            Grid::new(ui.next_auto_id()).show(ui, |ui| {
-                                // Index
-                                changed |=
-                                    DragValue::new(unsaturated.index.get_or_insert_default())
+                            // Unsaturated
+                            ui.collapsing("Unsaturated", |ui| {
+                                let bounds = fatty_acid.bounds();
+                                let mut changed = false;
+                                for unsaturated in &mut fatty_acid.unsaturated {
+                                    Grid::new(ui.next_auto_id()).show(ui, |ui| {
+                                        // Index
+                                        changed |= DragValue::new(
+                                            unsaturated.index.get_or_insert_default(),
+                                        )
                                         .range(0..=bounds)
                                         .custom_formatter(|value, _| {
                                             if value != 0.0 {
@@ -74,68 +78,72 @@ impl FattyAcidWidget<'_> {
                                         .update_while_editing(false)
                                         .ui(ui)
                                         .changed();
-                                // Isomerism
-                                let text = match &unsaturated.isomerism {
-                                    Some(Isomerism::Cis) => "C",
-                                    Some(Isomerism::Trans) => "T",
-                                    None => "*",
-                                };
-                                if ui.button(text).clicked() {
-                                    unsaturated.isomerism = match unsaturated.isomerism {
-                                        None => Some(Isomerism::Cis),
-                                        Some(Isomerism::Cis) => Some(Isomerism::Trans),
-                                        Some(Isomerism::Trans) => None,
-                                    };
-                                    changed = true;
+                                        // Isomerism
+                                        let text = match &unsaturated.isomerism {
+                                            Some(Isomerism::Cis) => "C",
+                                            Some(Isomerism::Trans) => "T",
+                                            None => "*",
+                                        };
+                                        if ui.button(text).clicked() {
+                                            unsaturated.isomerism = match unsaturated.isomerism {
+                                                None => Some(Isomerism::Cis),
+                                                Some(Isomerism::Cis) => Some(Isomerism::Trans),
+                                                Some(Isomerism::Trans) => None,
+                                            };
+                                            changed = true;
+                                        }
+                                        // Unsaturation
+                                        let text = match &unsaturated.unsaturation {
+                                            Some(Unsaturation::One) => "1",
+                                            Some(Unsaturation::Two) => "2",
+                                            None => "*",
+                                        };
+                                        if ui.button(text).clicked() {
+                                            unsaturated.unsaturation = match unsaturated
+                                                .unsaturation
+                                            {
+                                                None => Some(Unsaturation::One),
+                                                Some(Unsaturation::One) => Some(Unsaturation::Two),
+                                                Some(Unsaturation::Two) => None,
+                                            };
+                                            changed = true;
+                                        }
+                                    });
+                                    ui.end_row();
                                 }
-                                // Unsaturation
-                                let text = match &unsaturated.unsaturation {
-                                    Some(Unsaturation::One) => "1",
-                                    Some(Unsaturation::Two) => "2",
-                                    None => "*",
-                                };
-                                if ui.button(text).clicked() {
-                                    unsaturated.unsaturation = match unsaturated.unsaturation {
-                                        None => Some(Unsaturation::One),
-                                        Some(Unsaturation::One) => Some(Unsaturation::Two),
-                                        Some(Unsaturation::Two) => None,
-                                    };
-                                    changed = true;
+                                if changed {
+                                    inner = Some(take(&mut fatty_acid));
                                 }
                             });
-                            ui.end_row();
-                        }
-                        if changed {
-                            inner = Some(take(&mut fatty_acid));
-                        }
-                    });
-                    let mut unsaturated = fatty_acid.unsaturated.len();
-                    ui.with_layout(Layout::left_to_right(Align::TOP), |ui| {
-                        if ui
-                            .add(
-                                DragValue::new(&mut unsaturated)
-                                    .range(0..=fatty_acid.carbons)
-                                    .clamp_existing_to_range(true),
-                            )
-                            .changed()
-                        {
-                            loop {
-                                match unsaturated.cmp(&fatty_acid.unsaturated.len()) {
-                                    Ordering::Less => {
-                                        fatty_acid.unsaturated.pop();
+                            let mut unsaturated = fatty_acid.unsaturated.len();
+                            ui.with_layout(Layout::left_to_right(Align::TOP), |ui| {
+                                if ui
+                                    .add(
+                                        DragValue::new(&mut unsaturated)
+                                            .range(0..=fatty_acid.carbons)
+                                            .clamp_existing_to_range(true),
+                                    )
+                                    .changed()
+                                {
+                                    loop {
+                                        match unsaturated.cmp(&fatty_acid.unsaturated.len()) {
+                                            Ordering::Less => {
+                                                fatty_acid.unsaturated.pop();
+                                            }
+                                            Ordering::Equal => break,
+                                            Ordering::Greater => {
+                                                fatty_acid.unsaturated.push(Default::default());
+                                            }
+                                        }
                                     }
-                                    Ordering::Equal => break,
-                                    Ordering::Greater => {
-                                        fatty_acid.unsaturated.push(Default::default());
-                                    }
+                                    inner = Some(take(&mut fatty_acid));
                                 }
-                            }
-                            inner = Some(take(&mut fatty_acid));
-                        }
-                    });
-                });
-            })
-            .response
+                            });
+                        });
+                    })
+                    .response
+                },
+            )
         } else {
             ui.label(text)
         };

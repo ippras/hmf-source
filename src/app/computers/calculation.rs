@@ -83,7 +83,23 @@ impl Computer {
             ]);
             lazy_frame = calculate(lazy_frame, key.settings);
             lazy_frame = lazy_frame.with_columns([as_struct(vec![
-                col("A"),
+                // col("A"),
+                as_struct(vec![
+                    col("A").alias("Value"),
+                    col("StereospecificNumber2")
+                        .struct_()
+                        .field_by_name("ReferenceRange")
+                        .struct_()
+                        .field_by_name("Min")
+                        .alias("Min"),
+                    col("StereospecificNumber2")
+                        .struct_()
+                        .field_by_name("ReferenceRange")
+                        .struct_()
+                        .field_by_name("Max")
+                        .alias("Max"),
+                ])
+                .alias("A"),
                 col("B"),
                 col("C"),
                 col("D"),

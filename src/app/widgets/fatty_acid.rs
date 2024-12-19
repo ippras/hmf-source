@@ -1,6 +1,6 @@
 use crate::presets::MATURE_MILK;
 use egui::{ComboBox, InnerResponse, Ui};
-use fatty_acid::fatty_acid::{
+use lipid::fatty_acid::{
     FattyAcid,
     display::{COMMON, DisplayWithOptions},
     polars::DataFrameExt as _,
