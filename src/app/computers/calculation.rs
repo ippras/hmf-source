@@ -42,7 +42,9 @@ impl Computer {
                     .field_by_name("Median")
                     .alias("D"),
             ]);
+            println!("calculate0: {}", lazy_frame.clone().collect().unwrap());
             lazy_frame = calculate(lazy_frame, key.settings);
+            println!("calculate1: {}", lazy_frame.clone().collect().unwrap());
             lazy_frame = lazy_frame.with_columns([as_struct(vec![
                 as_struct(vec![
                     col("A").alias("Value"),

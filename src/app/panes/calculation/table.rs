@@ -4,7 +4,7 @@ use crate::app::{
     computers::{CalculationComputed, CalculationKey, CompositionComputed, CompositionKey},
     widgets::{FloatWidget, new_fatty_acid::FattyAcidWidget},
 };
-use egui::{Frame, Id, Margin, Response, TextStyle, TextWrapMode, Ui};
+use egui::{Frame, Id, Margin, Response, TextStyle, TextWrapMode, Ui, text::LayoutJob};
 use egui_phosphor::regular::MINUS;
 use egui_table::{AutoSizeMode, CellInfo, Column, HeaderCellInfo, HeaderRow, Table, TableDelegate};
 use lipid::fatty_acid::{
@@ -98,64 +98,69 @@ impl TableView<'_> {
         self.event
     }
 
-    fn header_cell_content_ui(&mut self, ui: &mut Ui, row: usize, column: usize) {
+    fn header_cell_content_ui(&mut self, ui: &mut Ui, row: usize, column: Range<usize>) {
         if self.settings.truncate {
             ui.style_mut().wrap_mode = Some(TextWrapMode::Truncate);
         }
         match (row, column) {
             // Top
-            (0, 0) => {
+            (0, ID) => {
                 ui.heading("ID");
             }
-            (0, 1) => {
+            (0, EXPERIMENTAL) => {
                 ui.heading("Experimental");
             }
-            (0, 2) => {
+            (0, CALCULATED) => {
                 ui.heading("Calculated");
             }
             // Middle
-            (1, 0) => {
+            (1, id::INDEX) => {
                 ui.heading("Index");
             }
-            (1, 1) => {
+            (1, id::FA) => {
                 ui.heading("FA");
             }
-            (1, 2) => {
+            (1, experimental::TAG123) => {
                 ui.heading("TAG");
             }
-            (1, 3) => {
+            (1, experimental::MAG2) => {
                 ui.heading("MAG2");
             }
-            (1, 4) => {
+            (1, calculated::SN123) => {
                 ui.heading("SN123");
             }
-            (1, 5) => {
+            (1, calculated::SN2) => {
                 ui.heading("SN2");
             }
             // Bottom
-            (2, 4 | 9) => {
+            (2, calculated::sn123::A | calculated::sn2::A) => {
                 ui.heading("A");
             }
-            (2, 5 | 10) => {
+            (2, calculated::sn123::B | calculated::sn2::B) => {
                 ui.heading("B");
             }
-            (2, 6 | 11) => {
+            (2, calculated::sn123::C | calculated::sn2::C) => {
                 ui.heading("C");
             }
-            (2, 7 | 12) => {
+            (2, calculated::sn123::D | calculated::sn2::D) => {
                 ui.heading("D");
             }
-            (2, 8 | 13) => {
+            (2, calculated::sn123::E | calculated::sn2::E) => {
                 ui.heading("E");
             }
-            (2, 14) => {
+            (2, calculated::F) => {
                 ui.heading("F");
             }
             _ => {} // _ => unreachable!(),
         };
     }
 
-    fn cell_content_ui(&mut self, ui: &mut Ui, row: usize, column: usize) -> PolarsResult<()> {
+    fn cell_content_ui(
+        &mut self,
+        ui: &mut Ui,
+        row: usize,
+        column: Range<usize>,
+    ) -> PolarsResult<()> {
         if !self.source.is_empty() {
             if row == self.source.height() {
                 self.footer_cell_content_ui(ui, column)?;
@@ -166,8 +171,13 @@ impl TableView<'_> {
         Ok(())
     }
 
-    fn body_cell_content_ui(&mut self, ui: &mut Ui, row: usize, column: usize) -> PolarsResult<()> {
-        match (row, column..column + 1) {
+    fn body_cell_content_ui(
+        &mut self,
+        ui: &mut Ui,
+        row: usize,
+        column: Range<usize>,
+    ) -> PolarsResult<()> {
+        match (row, column) {
             (row, id::INDEX) => {
                 if self.settings.editable {
                     if ui.button(MINUS).clicked() {
@@ -215,6 +225,8 @@ impl TableView<'_> {
                 })?
                 .on_hover_ui(|ui| {
                     ui.horizontal(|ui| {
+                        ui.spacing_mut().item_spacing.x = 0.0;
+                        ui.label("[");
                         FloatWidget::new(|| {
                             Ok(self.target["SN123"]
                                 .struct_()?
@@ -225,7 +237,7 @@ impl TableView<'_> {
                                 .get(row))
                         })
                         .ui(ui);
-                        ui.label("-");
+                        ui.label(";");
                         FloatWidget::new(|| {
                             Ok(self.target["SN123"]
                                 .struct_()?
@@ -236,6 +248,7 @@ impl TableView<'_> {
                                 .get(row))
                         })
                         .ui(ui);
+                        ui.label("]");
                     });
                 });
             }
@@ -255,7 +268,8 @@ impl TableView<'_> {
                         .field_by_name("C")?
                         .f64()?
                         .get(row))
-                })?;
+                })?
+                .on_hover_text("|A - B| / A");
             }
             (row, calculated::sn123::D) => {
                 self.ro(ui, || {
@@ -287,6 +301,8 @@ impl TableView<'_> {
                 })?
                 .on_hover_ui(|ui| {
                     ui.horizontal(|ui| {
+                        ui.spacing_mut().item_spacing.x = 0.0;
+                        ui.label("[");
                         FloatWidget::new(|| {
                             Ok(self.target["SN2"]
                                 .struct_()?
@@ -297,7 +313,7 @@ impl TableView<'_> {
                                 .get(row))
                         })
                         .ui(ui);
-                        ui.label("-");
+                        ui.label(";");
                         FloatWidget::new(|| {
                             Ok(self.target["SN2"]
                                 .struct_()?
@@ -308,6 +324,7 @@ impl TableView<'_> {
                                 .get(row))
                         })
                         .ui(ui);
+                        ui.label("]");
                     });
                 });
             }
@@ -327,7 +344,8 @@ impl TableView<'_> {
                         .field_by_name("C")?
                         .f64()?
                         .get(row))
-                })?;
+                })?
+                .on_hover_text("|A - B| / A");
             }
             (row, calculated::sn2::D) => {
                 self.ro(ui, || {
@@ -355,8 +373,8 @@ impl TableView<'_> {
         Ok(())
     }
 
-    fn footer_cell_content_ui(&mut self, ui: &mut Ui, column: usize) -> PolarsResult<()> {
-        match column..column + 1 {
+    fn footer_cell_content_ui(&mut self, ui: &mut Ui, column: Range<usize>) -> PolarsResult<()> {
+        match column {
             experimental::TAG123 => {
                 FloatWidget::new(|| Ok(self.source["TAG"].f64()?.sum()))
                     .precision(Some(self.settings.precision))
@@ -443,7 +461,7 @@ impl TableDelegate for TableView<'_> {
         Frame::none()
             .inner_margin(Margin::symmetric(MARGIN.x, MARGIN.y))
             .show(ui, |ui| {
-                self.header_cell_content_ui(ui, cell.row_nr, cell.group_index)
+                self.header_cell_content_ui(ui, cell.row_nr, cell.col_range.clone())
             });
     }
 
@@ -455,7 +473,7 @@ impl TableDelegate for TableView<'_> {
         Frame::none()
             .inner_margin(Margin::symmetric(MARGIN.x, MARGIN.y))
             .show(ui, |ui| {
-                self.cell_content_ui(ui, cell.row_nr as _, cell.col_nr)
+                self.cell_content_ui(ui, cell.row_nr as _, cell.col_nr..cell.col_nr + 1)
                     .unwrap()
             });
     }

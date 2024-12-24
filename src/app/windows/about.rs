@@ -35,17 +35,7 @@ impl About {
                     ui.label(COPYRIGHT);
                     Label::new("Giorgi Kazakov").sense(Sense::click()).ui(ui);
                     let id = Id::new("counter");
-                    let counter =
-                        ui.data_mut(|data| data.get_temp::<usize>(id).unwrap_or_default());
-                    let mut response = Label::new("Roman Sidorov").sense(Sense::click()).ui(ui);
-                    if counter > 42 {
-                        response = response.on_hover_text("♥ лучший котик в мире");
-                    }
-                    if response.clicked() {
-                        ui.data_mut(|data| data.insert_temp(id, counter + 1));
-                    } else if ui.input(|input| input.pointer.any_click()) {
-                        ui.data_mut(|data| data.remove::<usize>(id));
-                    }
+                    Label::new("Roman Sidorov").sense(Sense::click()).ui(ui);
                     ui.label("2024");
                     ui.separator();
                     ui.collapsing(RichText::new("Links").heading(), |ui| {

@@ -1,10 +1,10 @@
 use egui::{Align, DragValue, Grid, InnerResponse, Layout, Ui, Widget, vec2};
 use lipid::fatty_acid::{
-    FattyAcid, FattyAcidExt as _, Isomerism, Unsaturation,
+    FattyAcid, FattyAcidExt as _, Isomerism, Unsaturated, Unsaturation,
     display::{COMMON, DisplayWithOptions},
 };
 use polars::prelude::*;
-use std::{cmp::Ordering, mem::take};
+use std::cmp::Ordering;
 
 /// Fatty acid widget
 pub(crate) struct FattyAcidWidget<'a> {
@@ -52,7 +52,7 @@ impl FattyAcidWidget<'_> {
                             // Carbons
                             ui.label("Carbons");
                             if DragValue::new(&mut fatty_acid.carbons).ui(ui).changed() {
-                                inner = Some(take(&mut fatty_acid));
+                                inner = Some(fatty_acid.clone());
                             }
                             ui.end_row();
 
@@ -71,7 +71,7 @@ impl FattyAcidWidget<'_> {
                                             if value != 0.0 {
                                                 value.to_string()
                                             } else {
-                                                String::new()
+                                                "*".to_owned()
                                             }
                                         })
                                         .clamp_existing_to_range(true)
@@ -112,7 +112,14 @@ impl FattyAcidWidget<'_> {
                                     ui.end_row();
                                 }
                                 if changed {
-                                    inner = Some(take(&mut fatty_acid));
+                                    fatty_acid.unsaturated.sort_by_cached_key(|unsaturated| {
+                                        (
+                                            unsaturated.index,
+                                            unsaturated.isomerism,
+                                            unsaturated.unsaturation,
+                                        )
+                                    });
+                                    inner = Some(fatty_acid.clone());
                                 }
                             });
                             let mut unsaturated = fatty_acid.unsaturated.len();
@@ -132,11 +139,15 @@ impl FattyAcidWidget<'_> {
                                             }
                                             Ordering::Equal => break,
                                             Ordering::Greater => {
-                                                fatty_acid.unsaturated.push(Default::default());
+                                                fatty_acid.unsaturated.push(Unsaturated {
+                                                    index: Some(0),
+                                                    isomerism: Some(Isomerism::Cis),
+                                                    unsaturation: Some(Unsaturation::One),
+                                                });
                                             }
                                         }
                                     }
-                                    inner = Some(take(&mut fatty_acid));
+                                    inner = Some(fatty_acid.clone());
                                 }
                             });
                         });

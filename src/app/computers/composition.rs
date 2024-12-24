@@ -1,6 +1,6 @@
 use crate::{app::panes::calculation::control::Settings, presets::MATURE_MILK};
 use egui::util::cache::{ComputerMut, FrameCache};
-use lipid::fatty_acid::polars::{ExprExt as _, Find, FindByName};
+use lipid::fatty_acid::polars::{ExprExt as _, FindByName};
 use polars::prelude::*;
 use std::hash::{Hash, Hasher};
 
@@ -15,8 +15,9 @@ impl Computer {
     fn try_compute(&mut self, key: Key) -> PolarsResult<DataFrame> {
         let mut lazy_frame = key.data_frame.clone().lazy();
         println!("lazy_frame: {}", lazy_frame.clone().collect().unwrap());
-        lazy_frame =
-            lazy_frame.with_columns([col("FattyAcid").fatty_acid().linoleic(col("TAG")).sum()]);
+        lazy_frame = lazy_frame.with_columns([col("TAG")
+            .filter(col("FattyAcid").fatty_acid().linoleic())
+            .sum()]);
         println!("lazy_frame: {}", lazy_frame.clone().collect().unwrap());
         lazy_frame = lazy_frame.with_row_index("Index", None);
         lazy_frame.collect()
