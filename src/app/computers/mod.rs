@@ -1,7 +1,3 @@
-pub(crate) use self::{
-    calculation::{Computed as CalculationComputed, Key as CalculationKey},
-    composition::{Computed as CompositionComputed, Key as CompositionKey},
-};
+pub(crate) use self::calculation::{Computed as CalculationComputed, Key as CalculationKey};
 
 mod calculation;
-mod composition;

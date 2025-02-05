@@ -3,27 +3,24 @@ use self::{
     panes::{Pane, behavior::Behavior},
     windows::About,
 };
-use crate::{
-    localization::{UiExt, localize},
-    presets::*,
-};
+use crate::localization::{UiExt, localize};
 use eframe::{APP_KEY, CreationContext, Storage, get_value, set_value};
 use egui::{
     Align, Align2, CentralPanel, Color32, Context, FontDefinitions, Frame, Id, LayerId, Layout,
-    Order, RichText, ScrollArea, Separator, Sides, TextStyle, TopBottomPanel, Ui, Vec2, Visuals,
-    menu::bar, vec2, warn_if_debug_build,
+    Order, RichText, ScrollArea, Sides, TextStyle, TopBottomPanel, Vec2, Visuals, menu::bar, vec2,
+    warn_if_debug_build,
 };
 use egui_ext::{DroppedFileExt, HoveredFileExt, LabeledSeparator, LightDarkButton};
 use egui_notify::Toasts;
 use egui_phosphor::{
     Variant, add_to_fonts,
     regular::{
-        ARROWS_CLOCKWISE, ARROWS_HORIZONTAL, DATABASE, GRID_FOUR, INFO, PENCIL, PLUS,
+        ARROWS_CLOCKWISE, ARROWS_HORIZONTAL, GRID_FOUR, INFO, PENCIL, PLUS,
         SQUARE_SPLIT_HORIZONTAL, SQUARE_SPLIT_VERTICAL, TABS, TRASH,
     },
 };
 use egui_tiles::{ContainerKind, Tile, Tree};
-use egui_tiles_ext::{TilesExt as _, TreeExt as _, VERTICAL};
+use egui_tiles_ext::TilesExt as _;
 use serde::{Deserialize, Serialize};
 use std::{
     borrow::BorrowMut,
