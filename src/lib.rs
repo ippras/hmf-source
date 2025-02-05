@@ -5,3 +5,4 @@ pub use self::app::App;
 mod app;
 mod localization;
 mod presets;
+mod utils;

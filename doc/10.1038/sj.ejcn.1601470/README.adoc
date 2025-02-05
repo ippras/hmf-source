@@ -1,0 +1,149 @@
+= link:https://doi.org/10.1038/sj.ejcn.1601470[10.1038/sj.ejcn.1601470]
+
+== Relative values of fatty acid in sn-2 position
+
+[quote] Table 4 shows the sn-2 fatty acid composition of colostrum, transitional
+milk, mature milk and infant formulas; however, we think this is not the most
+suitable way of presenting data of sn-2 fatty acid composition. The reason for
+this can be explained easily through an example. If we compared our result of
+sn-2 palmitic acid in mature milk (52.30%) with other studies (Martin et al,
+1993; Nelson & Innis, 1999), our result was consistent with that of Martin et
+al, (51.22%), but was different from the result of Nelson and Innis (56.4%). The
+error is that we were comparing percentages of sn-2 palmitic acid, but without
+taking into account the total percentage of palmitic acid in human milk, which
+varies in the studies. When we expressed palmitic acid in sn-2 posi- tion as the
+percentage of the palmitic acid that is in sn-2 position (`relative palmitic
+acid in sn-2 position = (sn-2 palmitic acid / 3) * (100 / total palmitic acid in
+human milk`)), we found that 87.86% of the palmitic acid was in the sn-2
+position, whereas in Martin et al, this figure was 71.08% and in Nelson and
+Innis it was 81.38%. Now, our result is closer to Nelson and Innis than to
+Martin et al. We think it is better to express the results as ‘relative fatty
+acid in sn-2 position’ because the total percentage of each fatty acid is
+included. It is wrong to say that two samples have 30% palmitic acid in sn-2
+position if the percentage of palmitic acid in one sample is 20% and in the
+other 30%, because in the first sample the relative palmitic acid in sn-2
+position is 50% and in the second it is only 33.33%. This can be extended to
+studies that work with infant formulas with different percentages of palmitic
+acid in the sn-2 position. In some studies authors only detailed the percentage
+of palmitic acid in the sn-2 position, but this is only useful when the total
+amount of palmitic acid in the formulas compared is the same, because if it is
+not the same, as described above, this value is much less important than the
+relative palmitic acid in the sn-2 position. What is being studied is how
+different percentages of palmitic acid in the sn-2 position affect absorption of
+palmitic acid. In conclusion, we recommend authors to express all sn-2 values as
+relative fatty acid in sn-2 position (Table 5).
+
+== Data
+
+=== Table 2 Fatty acid composition of colostrum, transitional and mature milk (% wt/wt)
+
+|===
+|Fatty acids 2+|Colostrum (n = 40) 2+|Transitional (n = 40) 2+|Mature (n = 40)|
+
+|C8:0        |0.07±0.04 |0.00-0.21  |0.19±0.07 |0.06-0.35  |0.21±0.06 |0.11-0.36  |{a}{b}
+|C10:0       |0.66±0.37 |0.15-1.87  |1.66±0.57 |0.55-3.10  |1.63±0.47 |0.85-3.08  |{a}{b}
+|C12:0       |3.49±1.77 |1.40-8.76  |6.97±2.21 |3.00-11.31 |6.28±1.33 |4.05-9.35  |{a}{b}
+|C14:0       |4.75±1.65 |2.46-8.93  |6.94±1.88 |4.03-11.63 |6.00±1.44 |3.60-9.13  |{a}{b}
+|C14:1(n-5)  |0.14±0.07 |0.00-0.35  |0.16±0.08 |0.06-0.44  |0.20±0.10 |0.00-0.53  |
+|C15:0       |0.23±0.05 |0.16-0.39  |0.25±0.17 |0.09-1.11  |0.23±0.07 |0.11-0.48  |
+|C15:1       |0.03±0.03 |0.00-0.12  |0.04±0.03 |0.00-0.10  |0.04±0.03 |0.00-0.12  |
+|C16:0       |21.17±1.60|17.68-23.94|19.35±2.03|15.64-23.33|19.48±2.06|15.43-24.46|{a}{b}
+|C16:1(n-9)  |0.62±0.32 |0.42-2.17  |0.43±0.08 |0.27-0.61  |0.42±0.07 |0.29-0.58  |{a}{b}
+|C16:1(n-7)  |1.36±0.46 |0.00-2.46  |1.52±0.48 |0.92-2.90  |1.78±0.52 |1.10-2.81  |{b}
+|C17:0       |0.35±0.04 |0.28-0.44  |0.31±0.07 |0.18-0.43  |0.30±0.05 |0.19-0.44  |{a}{b}
+|C17:1       |0.19±0.03 |0.13-0.26  |0.18±0.04 |0.11-0.28  |0.19±0.05 |0.10-0.34  |
+|C18:0       |6.29±0.80 |4.66-8.20  |6.20±0.85 |4.27-7.49  |6.25±0.99 |4.60-8.13  |
+|C18:1(n-9)  |38.83±3.76|28.54-45.88|35.48±2.95|29.34-39.77|36.35±3.46|28.30-43.83|{a}{b}
+|C18:2(n-6)  |16.10±2.73|11.19-22.80|15.74±3.73|8.80-24.10 |16.59±4.10|10.61-25.30|
+|C18:3(n-6)  |0.06±0.06 |0.00-0.18  |0.07±0.04 |0.00-0.18  |0.13±0.07 |0.00-0.27  |{b}{c}
+|C20:0       |0.19±0.06 |0.00-0.31  |0.19±0.04 |0.07-0.29  |0.20±0.05 |0.13-0.35  |
+|C18:3(n-3)  |0.41±0.07 |0.23-0.56  |0.58±0.13 |0.31-0.79  |0.75±0.32 |0.41-1.68  |{a}{b}
+|C20:1(n-9)  |0.94±0.19 |0.64-1.50  |0.68±0.18 |0.36-1.19  |0.60±0.13 |0.34-0.82  |{a}{b}
+|C20:2(n-6)  |0.86±0.15 |0.54-1.19  |0.56±0.15 |0.34-0.94  |0.40±0.06 |0.28-0.55  |{a}{b}{c}
+|C20:3(n-6)  |0.65±0.22 |0.38-1.57  |0.49±0.13 |0.26-0.80  |0.48±0.14 |0.25-0.73  |{a}{b}
+|C22:0       |0.08±0.11 |0.00-0.67  |0.04±0.04 |0.00-0.10  |0.05±0.03 |0.00-0.09  |
+|C20:4(n-6)  |0.74±0.14 |0.46-1.12  |0.67±0.14 |0.50-0.97  |0.53±0.12 |0.23-0.75  |{a}{b}{c}
+|C22:1(n-9)  |0.18±0.11 |0.00-0.66  |0.10±0.06 |0.00-0.27  |0.06±0.03 |0.00-0.10  |{a}{b}{c}
+|C23:0       |0.02±0.03 |0.00-0.11  |0.04±0.03 |0.00-0.11  |0.05±0.03 |0.00-0.08  |
+|C20:5(n-3)  |0.19±0.03 |0.13-0.24  |0.11±0.05 |0.05-0.23  |0.10±0.05 |0.00-0.24  |{a}{b}
+|C24:0       |0.09±0.05 |0.00-0.22  |0.05±0.06 |0.00-0.20  |0.03±0.02 |0.00-0.07  |
+|C22:4(n-6)  |0.44±0.16 |0.24-0.80  |0.23±0.17 |0.10-0.88  |0.15±0.04 |0.09-0.24  |{a}{b}{c}
+|C22:4(n-3)  |0.08±0.03 |0.00-0.14  |0.07±0.03 |0.00-0.12  |0.04±0.03 |0.00-0.08  |{b}{c}
+|C22:5(n-6)  |0.04±0.04 |0.00-0.13  |0.03±0.04 |0.00-0.11  |0.01±0.05 |0.00-0.22  |{b}
+|C22:5(n-3)  |0.20±0.06 |0.09-0.36  |0.16±0.06 |0.08-0.33  |0.12±0.02 |0.08-0.16  |{b}{c}
+|C22:6(n-3)  |0.56±0.16 |0.39-0.92  |0.50±0.15 |0.29-0.79  |0.36±0.12 |0.15-0.56  |{b}{c}
+|SFA         |37.37±3.72|30.06-46.24|42.15±3.44|35.86-52.40|40.66±3.87|34.18-47.48|{a}{b}
+|MUFA        |42.29±4.02|31.14-49.71|38.59±3.24|32.05-43.31|39.63±3.57|32.08-47.34|{a}{b}
+|PUFA        |20.34±2.73|16.05-27.00|19.26±3.73|11.63-27.98|19.71±4.38|13.26-29.15|
+|PUFA(n-3)   |1.44±0.19 |0.93-1.74  |1.42±0.37 |0.86-2.44  |1.38±0.45 |0.81-3.06  |
+|PUFA(n-6)   |18.89±2.68|14.81-25.77|17.79±3.70|10.61-26.00|18.33±4.22|12.10-27.77|
+|LC-PUFA(n-3)|1.03±0.19 |0.58-1.44  |0.84±0.29 |0.53-1.60  |0.63±0.18 |0.34-0.89  |{b}{c}
+|LC-PUFA(n-6)|2.73±0.38 |1.98-3.43  |1.98±0.47 |1.39-3.50  |1.61±0.26 |1.17-2.16  |{a}{b}{c}
+|n-6=n-3     |14.70±2.68|10.26-22.85|13.08±4.34|6.63-22.20 |13.99±4.02|7.31-21.13 |
+|LA=LnA      |42.02±7.84|26.14-59.70|30.56±8.62|18.19-50.96|24.84±6.57|14.41-39.49|{a}{b}
+|AA=DHA      |1.48±0.36 |1.07-2.39  |1.41±0.44 |0.58-2.25  |1.61±0.56 |0.61-2.55  |
+|===
+
+* a Denotes significant differences (P < 0.05) between colostrum and mature milk.
+* b Denotes significant differences (P < 0.05) between colostrum and transitional milk.
+* c Denotes significant differences (P < 0.05) between transitional and mature milk.
+
+=== Table 4 Sn-2 fatty acid composition (% wt/wt) of colostrum, transitional, mature milk and infant formulas (IF1-IF11)
+
+|===
+|Fatty acids |Colostrum (n = 12) |Transitional (n = 12) |Mature (n = 12)| 2+|IF1 2+|IF2 2+|IF3 2+|IF4 2+|IF5 2+|IF6 2+|IF7 2+|IF8 2+|IF9 2+|IF10 2+|IF11
+
+|C8:0      |No.ne     |No.ne     |No.ne     |         |No.ne|   |0.07 |   |0.05 |   |0.05 |   |0.04 |   |0.05 |   |0.03 |   |0.03 |   |0.09 |   |0.05 |   |0.04 |
+|C10:0     |0.21±0.07 |0.29±0.05 |0.36±0.10 |{a}{b}{c}|0.16 |   |1.54 |{d}|0.41 |   |0.44 |   |0.26 |   |0.37 |   |0.37 |   |0.31 |   |0.36 |   |0.35 |   |0.27 |
+|C12:0     |2.41±0.83 |4.61±1.57 |4.81±0.81 |{a}{b}   |8.11d|   |9.85 |{d}|14.67|   |5.01 |   |10.58|{d}|15.32|{d}|4.68 |   |11.62|{d}|11.45|{d}|11.50|{d}|11.92|{d}
+|C14:0     |6.69±1.33 |10.74±1.48|9.66±1.61 |{a}{b}{c}|3.62d|   |7.10 |   |2.64 |{d}|4.53 |{d}|3.86 |{d}|3.14 |{d}|4.57 |{d}|2.23 |{d}|5.58 |{d}|2.57 |{d}|4.05 |{d}
+|C14:1(n-5)|No.ne     |No.ne     |No.ne     |         |No.ne|   |0.05 |   |0.03 |   |No.ne|   |No.ne|   |0.02 |   |0.34 |   |0.03 |   |0.04 |   |0.05 |   |No.ne|
+|C15:0     |0.51±0.08 |0.46±0.11 |0.53±0.11 |         |No.ne|   |0.02 |{d}|0.03 |{d}|0.02 |   |0.05 |{d}|0.04 |{d}|0.31 |   |0.04 |{d}|0.12 |{d}|0.05 |{d}|0.05 |{d}
+|C16:0     |52.23±2.72|51.17±4.91|52.30±4.44|         |32.67|{d}|15.05|{d}|5.88 |{d}|12.41|{d}|22.08|{d}|8.67 |{d}|13.23|{d}|6.22 |{d}|43.01|{d}|8.11 |{d}|22.57|{d}
+|C16:1(n-7)|1.97±0.49 |1.72±0.32 |1.88±0.51 |         |0.21 |{d}|0.17 |{d}|0.11 |{d}|0.08 |{d}|0.09 |{d}|0.11 |{d}|0.52 |{d}|0.12 |{d}|0.09 |{d}|0.12 |{d}|0.09 |{d}
+|C17:0     |0.38±0.02 |0.37±0.06 |0.37±0.06 |         |No.ne|   |No.ne|   |0.02 |{d}|0.13 |{d}|0.05 |{d}|0.03 |{d}|0.14 |{d}|0.03 |{d}|0.11 |{d}|0.04 |{d}|0.05 |{d}
+|C18:0     |1.68±0.21 |1.80±0.39 |1.71±0.29 |         |1.45 |   |2.05 |   |0.68 |{d}|1.55 |   |1.67 |   |0.91 |{d}|1.39 |   |0.56 |{d}|2.38 |{d}|0.99 |   |1.35 |
+|C18:1(n-9)|17.43±2.20|14.41±2.43|13.97±2.74|{a}{b}   |34.85|{d}|40.93|{d}|52.37|{d}|48.68|{d}|37.57|{d}|43.47|{d}|46.99|{d}|49.06|{d}|26.33|{d}|49.40|{d}|35.31|{d}
+|C18:2(n-6)|11.58±2.89|10.32±3.22|10.95±2.75|         |17.05|{d}|20.59|{d}|19.41|{d}|25.71|{d}|18.92|{d}|24.44|{d}|25.95|{d}|26.69|{d}|8.14 |   |25.23|{d}|19.33|{d}
+|C20:0     |0.16±0.04 |0.16±0.05 |0.13±0.04 |         |0.18 |{d}|0.50 |{d}|0.67 |{d}|0.16 |   |0.68 |{d}|0.17 |   |0.14 |   |0.15 |   |0.08 |   |0.15 |   |0.59 |{d}
+|C18:3(n-3)|0.28±0.07 |0.41c±0.11|0.59±0.10 |{a}{b}   |1.67 |{d}|1.92 |{d}|2.84 |{d}|1.03 |{d}|4.03 |{d}|3.19 |{d}|1.25 |{d}|2.82 |{d}|0.91 |{d}|1.32 |{d}|4.31 |{d}
+|C20:1(n-9)|0.51±0.11 |0.40±0.09 |0.41±0.11 |         |No.ne|   |0.13 |{d}|0.13 |{d}|0.14 |{d}|0.08 |{d}|0.04 |{d}|0.07 |{d}|0.06 |{d}|0.20 |   |0.04 |{d}|0.04 |{d}
+|C20:2(n-6)|0.40±0.08 |0.31±0.12 |0.21±0.05 |{b}{c}   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |0.35 |{d}|No.ne|   |No.ne|
+|C20:3(n-6)|0.34±0.05 |0.32±0.09 |0.25±0.09 |         |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|
+|C22:0     |No.ne     |No.ne     |No.ne     |         |0.02 |   |0.04 |   |0.02 |   |0.02 |   |0.05 |   |0.02 |   |0.02 |   |No.ne|   |0.03 |   |0.03 |   |0.03 |
+|C20:4(n-6)|1.16±0.18 |0.88±0.12 |0.67±0.15 |{a}{b}{c}|No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |0.40 |   |No.ne|   |No.ne|
+|C24:0     |No.ne     |No.ne     |No.ne     |         |No.ne|   |No.ne|   |0.03 |   |0.03 |   |No.ne|   |No.ne|   |No.ne|   |0.02 |   |0.05 |   |No.ne|   |No.ne|
+|C22:4(n-6)|0.84±0.07 |0.55±0.09 |0.29±0.06 |{a}{b}{c}|No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|
+|C22:5(n-3)|0.33±0.06 |0.28±0.06 |0.27±0.05 |         |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|
+|C22:6(n-3)|0.93±0.11 |0.81±0.13 |0.64±0.10 |{b}{c}   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |No.ne|   |0.28 |   |No.ne|   |No.ne|
+|===
+
+=== Table 5 Relative percentage of each fatty acid in sn-2 position in colostrum, transitional, mature and infant formulas (IF1-IF11)
+
+|===
+|Fatty acids |Colostrum (n = 12) |Transitional (n = 12) |Mature (n = 12)| |IF1 |IF2 |IF3 |IF4 |IF5 |IF6 |IF7 |IF8 |IF9 |IF10 |IF11
+
+|C8:0      |No.ne     |No.ne     |No.ne     |      |No.ne   |2.61    |3.05    |1.41    |1.60    |1.97    |1.90    |1.03    |3.58    |1.86    |1.46
+|C10:0     |12.28±3.59|8.25±3.05 |8.26±3.25 |{a}{b}|6.31    |40.49{d}|16.48   |11.84   |9.73    |11.09   |15.19{d}|10.30   |13.31   |11.90   |9.33
+|C12:0     |29.24±9.99|25.04±5.37|24.61±4.28|      |31.45   |53.03{d}|86.62{d}|15.35   |30.68   |45.58{d}|30.07   |45.43{d}|30.19   |45.73{d}|32.52
+|C14:0     |55.32±7.53|52.88±6.43|52.77±6.21|      |24.73{d}|41.66   |19.64{d}|30.10{d}|26.59{d}|19.93{d}|36.84{d}|17.14{d}|31.47{d}|21.08{d}|28.19{d}
+|C14:1(n-5)|No.ne     |No.ne     |No.ne     |      |No.ne   |5.89    |4.35    |No.ne   |No.ne   |56.76   |57.36   |67.92   |60.31   |72.48   |No.ne
+|C15:0     |76.55±6.29|72.09±5.82|78.47±9.02|      |No.ne   |2.12{d} |3.87{d} |14.99{d}|18.21{d}|21.25{d}|40.74{d}|19.81{d}|51.62{d}|27.00{d}|11.83{d}
+|C16:0     |80.30±4.63|86.25±7.73|87.86±6.67|      |41.06{d}|18.92{d}|7.33{d} |23.03{d}|38.80{d}|12.25{d}|16.09{d}|8.71{d} |62.37{d}|12.35{d}|41.36{d}
+|C16:1(n-7)|37.86±3.07|37.60±5.09|38.99±6.42|      |12.29{d}|6.41{d} |6.97{d} |17.93{d}|19.95{d}|24.79{d}|34.25   |25.19{d}|22.00{d}|26.98   |20.91{d}
+|C17:0     |36.44±4.17|37.55±4.46|40.48±4.64|      |No.ne   |No.ne   |3.67{d} |61.06{d}|17.77{d}|12.18{d}|20.68{d}|10.83{d}|43.19   |12.68{d}|19.24{d}
+|C18:0     |8.98±0.99 |9.05±1.50 |9.04±1.58 |      |9.54    |9.16    |4.68{d} |15.53{d}|15.81{d}|8.26    |9.34    |5.12{d} |25.96{d}|7.52    |13.93{d}
+|C18:1(n-9)|14.10±0.85|13.03±1.74|12.22±2.01|      |25.88{d}|32.24{d}|47.71{d}|36.31{d}|29.75{d}|42.19{d}|43.22{d}|43.80{d}|21.14{d}|43.41{d}|28.40{d}
+|C18:2(n-6)|23.84±3.00|23.54±4.36|22.07±2.60|      |36.86{d}|45.58{d}|39.40{d}|77.50{d}|49.76{d}|49.36{d}|50.82{d}|53.09{d}|30.39{d}|45.64{d}|48.25{d}
+|C20:0     |27.03±9.86|24.35±7.83|21.47±9.55|      |21.12   |39.74   |72.78{d}|13.28   |37.40   |16.36   |15.87   |13.95   |12.16   |15.97   |31.82
+|C18:3(n-3)|26.30±5.04|25.76±3.80|24.68±5.47|      |40.17{d}|46.78{d}|76.03{d}|12.36   |50.06{d}|54.28{d}|28.79   |45.86{d}|45.52{d}|28.33   |50.79{d}
+|C20:1(n-9)|17.41±1.62|20.34±3.61|22.06±5.34|      |No.ne   |8.47{d} |20.33   |7.81{d} |4.71d   |3.68{d} |13.62   |5.49{d} |14.41   |7.43{d} |2.99{d}
+|C20:2(n-6)|15.35±1.19|16.86±6.70|16.92±3.48|      |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |28.38{d}|No.ne   |No.ne
+|C20:3(n-6)|20.28±2.20|19.83±5.42|16.66±2.14|      |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne
+|C22:0     |No.ne     |No.ne     |No.ne     |      |3.16    |4.81    |5.01    |3.00    |5.01    |3.36    |4.17    |No.ne   |5.87    |3.40    |3.55
+|C20:4(n-6)|47.85±7.93|43.66±5.81|43.27±7.67|      |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |38.63   |No.ne   |No.ne
+|C24:0     |No.ne     |No.ne     |No.ne     |      |No.ne   |No.ne   |10.96   |7.86    |No.ne   |No.ne   |No.ne   |7.65    |20.70   |No.ne   |No.ne
+|C22:4(n-6)|70.96±7.14|73.48±9.70|62.79±8.07|{b}{c}|No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne
+|C22:5(n-3)|66.92±9.24|68.13±7.43|72.29±8.19|      |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne
+|C22:6(n-3)|52.63±7.18|56.8±7.18 |61.39±7.76|      |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |No.ne   |48.17   |No.ne   |No.ne
+|===

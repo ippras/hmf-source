@@ -1,5 +1,5 @@
 use self::locales::{EN, RU};
-use crate::app::SIZE;
+use crate::app::ICON_SIZE;
 use egui::{Response, RichText, Ui};
 use egui_phosphor::regular::TRANSLATE;
 use fluent::{FluentResource, concurrent::FluentBundle};
@@ -89,7 +89,7 @@ pub(crate) trait UiExt {
 
 impl UiExt for Ui {
     fn locale_button(&mut self) -> Response {
-        self.menu_button(RichText::new(TRANSLATE).size(SIZE), |ui| {
+        self.menu_button(RichText::new(TRANSLATE).size(ICON_SIZE), |ui| {
             let mut locale = LOCALIZATION.read().unwrap().locale();
             let mut response = ui.selectable_value(&mut locale, EN, "🇺🇸");
             response |= ui.selectable_value(&mut locale, RU, "🇷🇺");

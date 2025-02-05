@@ -1,17 +1,20 @@
-use super::control::Settings;
+use super::{ID_SOURCE, Settings, State};
 use crate::app::{
     MARGIN,
-    computers::{CalculationComputed, CalculationKey, CompositionComputed, CompositionKey},
+    computers::{CalculationComputed, CalculationKey},
     widgets::{FloatWidget, new_fatty_acid::FattyAcidWidget},
 };
-use egui::{Frame, Id, Margin, Response, TextStyle, TextWrapMode, Ui, text::LayoutJob};
-use egui_phosphor::regular::MINUS;
-use egui_table::{AutoSizeMode, CellInfo, Column, HeaderCellInfo, HeaderRow, Table, TableDelegate};
+use egui::{Frame, Id, Margin, Response, TextStyle, TextWrapMode, Ui};
+use egui_phosphor::regular::{MINUS, PLUS};
+use egui_table::{
+    AutoSizeMode, CellInfo, Column, HeaderCellInfo, HeaderRow, Table, TableDelegate, TableState,
+};
 use lipid::fatty_acid::{
     FattyAcid,
     polars::{DataFrameExt as _, SeriesExt as _},
 };
 use polars::{chunked_array::builder::AnonymousOwnedListBuilder, prelude::*};
+use re_ui::UiExt as _;
 use std::ops::Range;
 
 const ID: Range<usize> = 0..2;
@@ -24,34 +27,42 @@ const TOP: &[Range<usize>] = &[ID, EXPERIMENTAL, CALCULATED];
 const MIDDLE: &[Range<usize>] = &[
     id::INDEX,
     id::FA,
-    experimental::TAG123,
-    experimental::MAG2,
+    experimental::SN123,
+    experimental::SN2,
     calculated::SN123,
     calculated::SN2,
     calculated::F,
 ];
+
+const A: &str = "$A \\in [MIN, MAX]$";
+const C: &str = "$C = |A - B| / A$";
+const E: &str = "$E = 50 * (C * D / ∑ D)$";
 
 /// Table view
 pub(super) struct TableView<'a> {
     source: &'a mut DataFrame,
     target: DataFrame,
     settings: &'a Settings,
-    event: Option<Event>,
+    state: &'a mut State,
 }
 
 impl<'a> TableView<'a> {
-    pub(super) fn new(data_frame: &'a mut DataFrame, settings: &'a Settings) -> Self {
+    pub(super) fn new(
+        data_frame: &'a mut DataFrame,
+        settings: &'a Settings,
+        state: &'a mut State,
+    ) -> Self {
         Self {
             source: data_frame,
             target: DataFrame::empty(),
             settings,
-            event: None,
+            state,
         }
     }
 }
 
 impl TableView<'_> {
-    pub(super) fn ui(&mut self, ui: &mut Ui) -> Option<Event> {
+    pub(super) fn show(&mut self, ui: &mut Ui) {
         self.target = ui.memory_mut(|memory| {
             memory
                 .caches
@@ -61,16 +72,12 @@ impl TableView<'_> {
                     settings: self.settings,
                 })
         });
-        let data_frame = ui.memory_mut(|memory| {
-            memory
-                .caches
-                .cache::<CompositionComputed>()
-                .get(CompositionKey {
-                    data_frame: self.source,
-                    settings: self.settings,
-                })
-        });
-        let id_salt = Id::new("CalculationDataTable");
+        let id_salt = Id::new(ID_SOURCE).with("Table");
+        if self.state.reset_table_state {
+            let id = TableState::id(ui, Id::new(id_salt));
+            TableState::reset(ui.ctx(), id);
+            self.state.reset_table_state = false;
+        }
         let height = ui.text_style_height(&TextStyle::Heading);
         let num_rows = self.source.height() as u64 + 1;
         let num_columns = LEN;
@@ -95,7 +102,14 @@ impl TableView<'_> {
             ])
             .auto_size_mode(AutoSizeMode::OnParentResize)
             .show(ui, self);
-        self.event
+        if self.state.add_table_row {
+            self.add_row().unwrap();
+            self.state.add_table_row = false;
+        }
+        if let Some(index) = self.state.delete_table_row {
+            self.delete_row(index).unwrap();
+            self.state.delete_table_row = None;
+        }
     }
 
     fn header_cell_content_ui(&mut self, ui: &mut Ui, row: usize, column: Range<usize>) {
@@ -120,38 +134,38 @@ impl TableView<'_> {
             (1, id::FA) => {
                 ui.heading("FA");
             }
-            (1, experimental::TAG123) => {
-                ui.heading("TAG");
-            }
-            (1, experimental::MAG2) => {
-                ui.heading("MAG2");
-            }
-            (1, calculated::SN123) => {
+            (1, experimental::SN123 | calculated::SN123) => {
                 ui.heading("SN123");
             }
-            (1, calculated::SN2) => {
+            (1, experimental::SN2 | calculated::SN2) => {
                 ui.heading("SN2");
             }
             // Bottom
             (2, calculated::sn123::A | calculated::sn2::A) => {
-                ui.heading("A");
+                ui.heading("A").on_hover_ui(|ui| {
+                    ui.markdown_ui(A);
+                });
             }
             (2, calculated::sn123::B | calculated::sn2::B) => {
                 ui.heading("B");
             }
             (2, calculated::sn123::C | calculated::sn2::C) => {
-                ui.heading("C");
+                ui.heading("C").on_hover_ui(|ui| {
+                    ui.markdown_ui(C);
+                });
             }
             (2, calculated::sn123::D | calculated::sn2::D) => {
                 ui.heading("D");
             }
             (2, calculated::sn123::E | calculated::sn2::E) => {
-                ui.heading("E");
+                ui.heading("E").on_hover_ui(|ui| {
+                    ui.markdown_ui(E);
+                });
             }
             (2, calculated::F) => {
                 ui.heading("F");
             }
-            _ => {} // _ => unreachable!(),
+            _ => {}
         };
     }
 
@@ -177,18 +191,18 @@ impl TableView<'_> {
         row: usize,
         column: Range<usize>,
     ) -> PolarsResult<()> {
-        match (row, column) {
-            (row, id::INDEX) => {
+        match (row, &column) {
+            (row, &id::INDEX) => {
                 if self.settings.editable {
                     if ui.button(MINUS).clicked() {
-                        self.event = Some(Event::DeleteRow(row));
+                        self.state.delete_table_row = Some(row);
                     }
                 }
                 let indices = self.target["Index"].u32()?;
                 let index = indices.get(row).unwrap();
                 ui.label(index.to_string());
             }
-            (row, id::FA) => {
+            (row, &id::FA) => {
                 let inner_response = FattyAcidWidget::new(|| self.source.fatty_acid().get(row))
                     .editable(self.settings.editable)
                     .hover()
@@ -197,29 +211,25 @@ impl TableView<'_> {
                     self.source
                         .try_apply("FattyAcid", change_fatty_acid(row, &value))?;
                 }
-                // let changed = FattyAcidWidget::new(|| self.source.fatty_acid().get(row))
-                //     .editable(self.settings.editable)
-                //     .hover()
-                //     .ui(ui)
-                //     .inner;
-                // if let Some(value) = changed {
-                //     self.source
-                //         .try_apply("FattyAcid", change_fatty_acid(row, &value))?;
-                // }
             }
-            (row, experimental::TAG123) => {
-                self.rw(ui, row, "TAG")?;
+            (row, &experimental::SN123) => {
+                self.rw(ui, row, "StereospecificNumber123")?;
             }
-            (row, experimental::MAG2) => {
-                self.rw(ui, row, "MAG")?;
+            (row, &experimental::SN2) => {
+                self.rw(ui, row, "StereospecificNumber2")?;
             }
-            (row, calculated::sn123::A) => {
+            (row, &calculated::sn123::A | &calculated::sn2::A) => {
+                let name = match column {
+                    calculated::sn123::A => "StereospecificNumber123",
+                    calculated::sn2::A => "StereospecificNumber2",
+                    _ => unreachable!(),
+                };
                 self.ro(ui, || {
-                    Ok(self.target["SN123"]
+                    Ok(self.target[name]
+                        .struct_()?
+                        .field_by_name("Data")?
                         .struct_()?
                         .field_by_name("A")?
-                        .struct_()?
-                        .field_by_name("Value")?
                         .f64()?
                         .get(row))
                 })?
@@ -228,20 +238,20 @@ impl TableView<'_> {
                         ui.spacing_mut().item_spacing.x = 0.0;
                         ui.label("[");
                         FloatWidget::new(|| {
-                            Ok(self.target["SN123"]
+                            Ok(self.target[name]
                                 .struct_()?
-                                .field_by_name("A")?
+                                .field_by_name("Meta")?
                                 .struct_()?
                                 .field_by_name("Min")?
                                 .f64()?
                                 .get(row))
                         })
                         .ui(ui);
-                        ui.label(";");
+                        ui.label(",");
                         FloatWidget::new(|| {
-                            Ok(self.target["SN123"]
+                            Ok(self.target[name]
                                 .struct_()?
-                                .field_by_name("A")?
+                                .field_by_name("Meta")?
                                 .struct_()?
                                 .field_by_name("Max")?
                                 .f64()?
@@ -252,148 +262,187 @@ impl TableView<'_> {
                     });
                 });
             }
-            (row, calculated::sn123::B) => {
+            (row, &calculated::sn123::B | &calculated::sn2::B) => {
+                let name = match column {
+                    calculated::sn123::B => "StereospecificNumber123",
+                    calculated::sn2::B => "StereospecificNumber2",
+                    _ => unreachable!(),
+                };
                 self.ro(ui, || {
-                    Ok(self.target["SN123"]
+                    Ok(self.target[name]
+                        .struct_()?
+                        .field_by_name("Data")?
                         .struct_()?
                         .field_by_name("B")?
                         .f64()?
                         .get(row))
                 })?;
             }
-            (row, calculated::sn123::C) => {
+            (row, &calculated::sn123::C | &calculated::sn2::C) => {
+                let name = match column {
+                    calculated::sn123::C => "StereospecificNumber123",
+                    calculated::sn2::C => "StereospecificNumber2",
+                    _ => unreachable!(),
+                };
+                let a = self.target[name]
+                    .struct_()?
+                    .field_by_name("Data")?
+                    .struct_()?
+                    .field_by_name("A")?
+                    .get(row)?
+                    .to_string();
+                let b = self.target[name]
+                    .struct_()?
+                    .field_by_name("Data")?
+                    .struct_()?
+                    .field_by_name("B")?
+                    .get(row)?
+                    .to_string();
                 self.ro(ui, || {
-                    Ok(self.target["SN123"]
+                    Ok(self.target[name]
+                        .struct_()?
+                        .field_by_name("Data")?
                         .struct_()?
                         .field_by_name("C")?
-                        .f64()?
-                        .get(row))
-                })?
-                .on_hover_text("|A - B| / A");
-            }
-            (row, calculated::sn123::D) => {
-                self.ro(ui, || {
-                    Ok(self.target["SN123"]
-                        .struct_()?
-                        .field_by_name("D")?
-                        .f64()?
-                        .get(row))
-                })?;
-            }
-            (row, calculated::sn123::E) => {
-                self.ro(ui, || {
-                    Ok(self.target["SN123"]
-                        .struct_()?
-                        .field_by_name("E")?
-                        .f64()?
-                        .get(row))
-                })?;
-            }
-            (row, calculated::sn2::A) => {
-                self.ro(ui, || {
-                    Ok(self.target["SN2"]
-                        .struct_()?
-                        .field_by_name("A")?
-                        .struct_()?
-                        .field_by_name("Value")?
                         .f64()?
                         .get(row))
                 })?
                 .on_hover_ui(|ui| {
-                    ui.horizontal(|ui| {
-                        ui.spacing_mut().item_spacing.x = 0.0;
-                        ui.label("[");
-                        FloatWidget::new(|| {
-                            Ok(self.target["SN2"]
-                                .struct_()?
-                                .field_by_name("A")?
-                                .struct_()?
-                                .field_by_name("Min")?
-                                .f64()?
-                                .get(row))
-                        })
-                        .ui(ui);
-                        ui.label(";");
-                        FloatWidget::new(|| {
-                            Ok(self.target["SN2"]
-                                .struct_()?
-                                .field_by_name("A")?
-                                .struct_()?
-                                .field_by_name("Max")?
-                                .f64()?
-                                .get(row))
-                        })
-                        .ui(ui);
-                        ui.label("]");
-                    });
+                    ui.markdown_ui(&format!("|{a} - {b}| / {a}"));
                 });
             }
-            (row, calculated::sn2::B) => {
-                self.ro(ui, || {
-                    Ok(self.target["SN2"]
+            (row, &calculated::sn123::D | &calculated::sn2::D) => {
+                let name = match column {
+                    calculated::sn123::D => "StereospecificNumber123",
+                    calculated::sn2::D => "StereospecificNumber2",
+                    _ => unreachable!(),
+                };
+                let d = self.target[name]
+                    .struct_()?
+                    .field_by_name("Data")?
+                    .struct_()?
+                    .field_by_name("D")?
+                    .f64()?
+                    .get(row);
+                let response = self.ro(ui, || Ok(d))?;
+                if let Ok((Some(d), Some(sum))) = (|| -> PolarsResult<_> {
+                    let sum = self.target[name]
                         .struct_()?
-                        .field_by_name("B")?
-                        .f64()?
-                        .get(row))
-                })?;
-            }
-            (row, calculated::sn2::C) => {
-                self.ro(ui, || {
-                    Ok(self.target["SN2"]
+                        .field_by_name("Meta")?
                         .struct_()?
-                        .field_by_name("C")?
+                        .field_by_name("Sum")?
                         .f64()?
-                        .get(row))
-                })?
-                .on_hover_text("|A - B| / A");
+                        .get(row);
+                    Ok((d, sum))
+                })() {
+                    response.on_hover_ui(|ui| {
+                        ui.label(format!(
+                            "{d} / {} = {}",
+                            AnyValue::Float64(sum),
+                            AnyValue::Float64(d / sum),
+                        ));
+                    });
+                }
             }
-            (row, calculated::sn2::D) => {
+            (row, &calculated::sn123::E | &calculated::sn2::E) => {
+                let name = match column {
+                    calculated::sn123::E => "StereospecificNumber123",
+                    calculated::sn2::E => "StereospecificNumber2",
+                    _ => unreachable!(),
+                };
+                let c = self.target[name]
+                    .struct_()?
+                    .field_by_name("Data")?
+                    .struct_()?
+                    .field_by_name("C")?
+                    .get(row)?
+                    .to_string();
+                let d = self.target[name]
+                    .struct_()?
+                    .field_by_name("Data")?
+                    .struct_()?
+                    .field_by_name("D")?
+                    .get(row)?
+                    .to_string();
+                let sum = self.target[name]
+                    .struct_()?
+                    .field_by_name("Meta")?
+                    .struct_()?
+                    .field_by_name("Sum")?
+                    .get(row)?
+                    .to_string();
                 self.ro(ui, || {
-                    Ok(self.target["SN2"]
+                    Ok(self.target[name]
                         .struct_()?
-                        .field_by_name("D")?
-                        .f64()?
-                        .get(row))
-                })?;
-            }
-            (row, calculated::sn2::E) => {
-                self.ro(ui, || {
-                    Ok(self.target["SN2"]
+                        .field_by_name("Data")?
                         .struct_()?
                         .field_by_name("E")?
                         .f64()?
                         .get(row))
-                })?;
+                })?
+                .on_hover_ui(|ui| {
+                    ui.markdown_ui(&format!("50 * {c} * {d} / {sum}"));
+                });
             }
-            (row, calculated::F) => {
+            (row, &calculated::F) => {
                 self.ro(ui, || Ok(self.target["F"].f64()?.get(row)))?;
             }
-            _ => {} // _ => unreachable!(),
+            _ => {}
         }
         Ok(())
     }
 
     fn footer_cell_content_ui(&mut self, ui: &mut Ui, column: Range<usize>) -> PolarsResult<()> {
         match column {
-            experimental::TAG123 => {
-                FloatWidget::new(|| Ok(self.source["TAG"].f64()?.sum()))
+            id::INDEX => {
+                if self.settings.editable {
+                    if ui.button(PLUS).clicked() {
+                        self.state.add_table_row = true;
+                    }
+                }
+            }
+            experimental::SN123 => {
+                FloatWidget::new(|| Ok(self.source["StereospecificNumber123"].f64()?.sum()))
                     .precision(Some(self.settings.precision))
                     .hover()
                     .ui(ui)
                     .response
                     .on_hover_text("∑TAG");
             }
-            experimental::MAG2 => {
-                FloatWidget::new(|| Ok(self.source["MAG"].f64()?.sum()))
+            experimental::SN2 => {
+                FloatWidget::new(|| Ok(self.source["StereospecificNumber2"].f64()?.sum()))
                     .precision(Some(self.settings.precision))
                     .hover()
                     .ui(ui)
                     .response
                     .on_hover_text("∑MAG");
             }
+            calculated::sn123::D | calculated::sn2::D => {
+                let name = match column {
+                    calculated::sn123::D => "StereospecificNumber123",
+                    calculated::sn2::D => "StereospecificNumber2",
+                    _ => unreachable!(),
+                };
+                FloatWidget::new(|| {
+                    Ok(self.target[name]
+                        .struct_()?
+                        .field_by_name("Meta")?
+                        .struct_()?
+                        .field_by_name("Sum")?
+                        .f64()?
+                        .first())
+                })
+                .precision(Some(self.settings.precision))
+                .hover()
+                .ui(ui)
+                .response
+                .on_hover_text("∑D");
+            }
             calculated::sn123::E => {
                 FloatWidget::new(|| {
-                    Ok(self.target["SN123"]
+                    Ok(self.target["StereospecificNumber123"]
+                        .struct_()?
+                        .field_by_name("Data")?
                         .struct_()?
                         .field_by_name("E")?
                         .f64()?
@@ -408,7 +457,9 @@ impl TableView<'_> {
             }
             calculated::sn2::E => {
                 FloatWidget::new(|| {
-                    Ok(self.target["SN2"]
+                    Ok(self.target["StereospecificNumber2"]
+                        .struct_()?
+                        .field_by_name("Data")?
                         .struct_()?
                         .field_by_name("E")?
                         .f64()?
@@ -454,6 +505,61 @@ impl TableView<'_> {
             .ui(ui)
             .response)
     }
+
+    fn add_row(&mut self) -> PolarsResult<()> {
+        println!("self.source: {}", self.source);
+        *self.source = self.source.vstack(&df! {
+            "FattyAcid" => df! {
+                "Carbons" => &[0u8],
+                "Unsaturated" => &[
+                    df! {
+                        "Index" => Series::new_empty(PlSmallStr::EMPTY, &DataType::UInt8),
+                        "Isomerism" => Series::new_empty(PlSmallStr::EMPTY, &DataType::Int8),
+                        "Unsaturation" => Series::new_empty(PlSmallStr::EMPTY, &DataType::UInt8),
+                    }?.into_struct(PlSmallStr::EMPTY).into_series(),
+                ],
+            }?.into_struct(PlSmallStr::EMPTY),
+            "StereospecificNumber123" => [0f64],
+            "StereospecificNumber2" => [0f64],
+        }?)?;
+        self.source.as_single_chunk_par();
+        // *self.source = concat(
+        //     [
+        //         self.source.clone().lazy(),
+        //         df! {
+        //             "FattyAcid" => df! {
+        //                 "Carbons" => &[0u8],
+        //                 "Unsaturated" => &[
+        //                     df! {
+        //                         "Index" => Series::new_empty(PlSmallStr::EMPTY, &DataType::UInt8),
+        //                         "Isomerism" => Series::new_empty(PlSmallStr::EMPTY, &DataType::Int8),
+        //                         "Unsaturation" => Series::new_empty(PlSmallStr::EMPTY, &DataType::UInt8),
+        //                     }?.into_struct(PlSmallStr::EMPTY).into_series(),
+        //                 ],
+        //             }?.into_struct(PlSmallStr::EMPTY),
+        //             "StereospecificNumber123" => [0f64],
+        //             "StereospecificNumber12" => [0f64],
+        //         }?
+        //         .lazy(),
+        //     ],
+        //     UnionArgs {
+        //         rechunk: true,
+        //         diagonal: true,
+        //         ..Default::default()
+        //     },
+        // )?
+        // .collect()?;
+        Ok(())
+    }
+
+    fn delete_row(&mut self, row: usize) -> PolarsResult<()> {
+        *self.source = self
+            .source
+            .slice(0, row)
+            .vstack(&self.source.slice((row + 1) as _, usize::MAX))?;
+        self.source.as_single_chunk_par();
+        Ok(())
+    }
 }
 
 impl TableDelegate for TableView<'_> {
@@ -477,12 +583,6 @@ impl TableDelegate for TableView<'_> {
                     .unwrap()
             });
     }
-}
-
-/// Event
-#[derive(Clone, Copy, Debug)]
-pub(super) enum Event {
-    DeleteRow(usize),
 }
 
 fn change_fatty_acid(
@@ -603,8 +703,8 @@ mod id {
 mod experimental {
     use super::*;
 
-    pub(super) const TAG123: Range<usize> = EXPERIMENTAL.start..EXPERIMENTAL.start + 1;
-    pub(super) const MAG2: Range<usize> = TAG123.end..TAG123.end + 1;
+    pub(super) const SN123: Range<usize> = EXPERIMENTAL.start..EXPERIMENTAL.start + 1;
+    pub(super) const SN2: Range<usize> = SN123.end..SN123.end + 1;
 }
 
 mod calculated {

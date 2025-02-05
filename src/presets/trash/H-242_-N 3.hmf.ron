@@ -27,17 +27,21 @@
                     ])),
                 ),
             ]),
-            "length": 4,
+            "length": 8,
             "values": [
                 {
                     "name": "Carbons",
                     "datatype": UInt8,
                     "bit_settings": "",
                     "values": [
+                        14,
+                        16,
                         16,
                         18,
                         18,
                         18,
+                        20,
+                        20,
                     ],
                 },
                 {
@@ -58,6 +62,126 @@
                     ])),
                     "bit_settings": "",
                     "values": [
+                        {
+                            "name": "",
+                            "datatype": Struct([
+                                (
+                                    name: "Index",
+                                    dtype: UInt8,
+                                ),
+                                (
+                                    name: "Isomerism",
+                                    dtype: Int8,
+                                ),
+                                (
+                                    name: "Unsaturation",
+                                    dtype: UInt8,
+                                ),
+                            ]),
+                            "length": 0,
+                            "values": [
+                                {
+                                    "name": "Index",
+                                    "datatype": UInt8,
+                                    "bit_settings": "",
+                                    "values": [],
+                                },
+                                {
+                                    "name": "Isomerism",
+                                    "datatype": Int8,
+                                    "bit_settings": "",
+                                    "values": [],
+                                },
+                                {
+                                    "name": "Unsaturation",
+                                    "datatype": UInt8,
+                                    "bit_settings": "",
+                                    "values": [],
+                                },
+                            ],
+                        },
+                        {
+                            "name": "",
+                            "datatype": Struct([
+                                (
+                                    name: "Index",
+                                    dtype: UInt8,
+                                ),
+                                (
+                                    name: "Isomerism",
+                                    dtype: Int8,
+                                ),
+                                (
+                                    name: "Unsaturation",
+                                    dtype: UInt8,
+                                ),
+                            ]),
+                            "length": 0,
+                            "values": [
+                                {
+                                    "name": "Index",
+                                    "datatype": UInt8,
+                                    "bit_settings": "",
+                                    "values": [],
+                                },
+                                {
+                                    "name": "Isomerism",
+                                    "datatype": Int8,
+                                    "bit_settings": "",
+                                    "values": [],
+                                },
+                                {
+                                    "name": "Unsaturation",
+                                    "datatype": UInt8,
+                                    "bit_settings": "",
+                                    "values": [],
+                                },
+                            ],
+                        },
+                        {
+                            "name": "",
+                            "datatype": Struct([
+                                (
+                                    name: "Index",
+                                    dtype: UInt8,
+                                ),
+                                (
+                                    name: "Isomerism",
+                                    dtype: Int8,
+                                ),
+                                (
+                                    name: "Unsaturation",
+                                    dtype: UInt8,
+                                ),
+                            ]),
+                            "length": 1,
+                            "values": [
+                                {
+                                    "name": "Index",
+                                    "datatype": UInt8,
+                                    "bit_settings": "",
+                                    "values": [
+                                        9,
+                                    ],
+                                },
+                                {
+                                    "name": "Isomerism",
+                                    "datatype": Int8,
+                                    "bit_settings": "",
+                                    "values": [
+                                        1,
+                                    ],
+                                },
+                                {
+                                    "name": "Unsaturation",
+                                    "datatype": UInt8,
+                                    "bit_settings": "",
+                                    "values": [
+                                        1,
+                                    ],
+                                },
+                            ],
+                        },
                         {
                             "name": "",
                             "datatype": Struct([
@@ -203,16 +327,17 @@
                                     dtype: UInt8,
                                 ),
                             ]),
-                            "length": 3,
+                            "length": 4,
                             "values": [
                                 {
                                     "name": "Index",
                                     "datatype": UInt8,
                                     "bit_settings": "",
                                     "values": [
-                                        9,
-                                        12,
-                                        15,
+                                        5,
+                                        8,
+                                        11,
+                                        14,
                                     ],
                                 },
                                 {
@@ -223,6 +348,7 @@
                                         1,
                                         1,
                                         1,
+                                        1,
                                     ],
                                 },
                                 {
@@ -230,6 +356,63 @@
                                     "datatype": UInt8,
                                     "bit_settings": "",
                                     "values": [
+                                        1,
+                                        1,
+                                        1,
+                                        1,
+                                    ],
+                                },
+                            ],
+                        },
+                        {
+                            "name": "",
+                            "datatype": Struct([
+                                (
+                                    name: "Index",
+                                    dtype: UInt8,
+                                ),
+                                (
+                                    name: "Isomerism",
+                                    dtype: Int8,
+                                ),
+                                (
+                                    name: "Unsaturation",
+                                    dtype: UInt8,
+                                ),
+                            ]),
+                            "length": 5,
+                            "values": [
+                                {
+                                    "name": "Index",
+                                    "datatype": UInt8,
+                                    "bit_settings": "",
+                                    "values": [
+                                        5,
+                                        8,
+                                        11,
+                                        14,
+                                        17,
+                                    ],
+                                },
+                                {
+                                    "name": "Isomerism",
+                                    "datatype": Int8,
+                                    "bit_settings": "",
+                                    "values": [
+                                        1,
+                                        1,
+                                        1,
+                                        1,
+                                        1,
+                                    ],
+                                },
+                                {
+                                    "name": "Unsaturation",
+                                    "datatype": UInt8,
+                                    "bit_settings": "",
+                                    "values": [
+                                        1,
+                                        1,
                                         1,
                                         1,
                                         1,
@@ -246,10 +429,14 @@
             "datatype": Float64,
             "bit_settings": "",
             "values": [
-                19.92,
-                8.8,
-                4.55,
-                0.25,
+                3.670868,
+                18.537193,
+                65.449774,
+                0.562719,
+                9.540782,
+                0.594182,
+                0.282942,
+                1.361539,
             ],
         },
         {
@@ -257,10 +444,14 @@
             "datatype": Float64,
             "bit_settings": "",
             "values": [
-                62.4,
-                1.53,
-                1.67,
-                0.11,
+                7.775363,
+                41.235599,
+                50.038488,
+                0.0868,
+                0.327422,
+                0.192398,
+                0.0,
+                0.343932,
             ],
         },
     ],

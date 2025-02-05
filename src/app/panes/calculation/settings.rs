@@ -1,35 +1,10 @@
 use crate::{app::MAX_PRECISION, localization::localize};
-use egui::{Grid, Slider, Ui, Widget, Window};
-use egui_phosphor::regular::{
-    ARROWS_HORIZONTAL, FLOPPY_DISK, GEAR, MINUS, PENCIL, PLUS, TAG, TRASH,
-};
+use egui::{Grid, Id, Slider, Ui, Widget};
 use serde::{Deserialize, Serialize};
 
-/// Calculation control
-#[derive(Default, Deserialize, Serialize)]
-pub(crate) struct Control {
-    pub(crate) settings: Settings,
-    pub(crate) open: bool,
-}
+use super::ID_SOURCE;
 
-impl Control {
-    pub(crate) const fn new() -> Self {
-        Self {
-            settings: Settings::new(),
-            open: false,
-        }
-    }
-
-    pub(crate) fn windows(&mut self, ui: &mut Ui) {
-        Window::new(format!("{GEAR} Calculation settings"))
-            .id(ui.next_auto_id())
-            .default_pos(ui.next_widget_position())
-            .open(&mut self.open)
-            .show(ui.ctx(), |ui| self.settings.ui(ui));
-    }
-}
-
-/// Calculation settings
+/// Settings
 #[derive(Clone, Debug, Deserialize, Hash, PartialEq, Serialize)]
 pub(crate) struct Settings {
     #[serde(skip)]
@@ -42,7 +17,7 @@ pub(crate) struct Settings {
     pub(crate) sticky: usize,
     pub(crate) truncate: bool,
 
-    pub(crate) names: bool,
+    pub(crate) relative: bool,
     pub(crate) properties: bool,
 }
 
@@ -56,13 +31,14 @@ impl Settings {
             round: 0,
             sticky: 0,
             truncate: false,
-            names: true,
+            relative: true,
             properties: true,
         }
     }
 
-    pub(crate) fn ui(&mut self, ui: &mut Ui) {
-        Grid::new(ui.next_auto_id()).show(ui, |ui| {
+    pub(crate) fn show(&mut self, ui: &mut Ui) {
+        let id_salt = Id::new(ID_SOURCE).with("Settings");
+        Grid::new(id_salt).show(ui, |ui| {
             // Precision
             ui.label(localize!("precision"));
             Slider::new(&mut self.precision, 0..=MAX_PRECISION).ui(ui);
@@ -85,10 +61,10 @@ impl Settings {
                 .on_hover_text(localize!("properties_description"));
             ui.end_row();
 
-            // Names
-            ui.label(localize!("names"));
-            ui.checkbox(&mut self.names, "")
-                .on_hover_text(localize!("names_description"));
+            // Relative
+            ui.label(localize!("relative"));
+            ui.checkbox(&mut self.relative, "")
+                .on_hover_text(localize!("relative_description"));
         });
     }
 }

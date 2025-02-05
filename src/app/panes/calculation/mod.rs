@@ -1,182 +1,165 @@
-use self::{
-    control::{Control, Settings},
-    table::{Event, TableView},
-};
-use crate::localization::localize;
+use self::{settings::Settings, state::State, table::TableView};
+use crate::{localization::localize, utils::save};
 use anyhow::Result;
-use egui::{RichText, ScrollArea, TextEdit, Ui, Widget, menu::bar};
-use egui_phosphor::regular::{ARROWS_HORIZONTAL, FLOPPY_DISK, GEAR, PENCIL, PLUS, TAG, TRASH};
-use polars::prelude::*;
-use ron::{extensions::Extensions, ser::PrettyConfig};
+use egui::{CursorIcon, Response, RichText, ScrollArea, Ui, Window, menu::bar, util::hash};
+use egui_phosphor::regular::{
+    ARROWS_CLOCKWISE, ARROWS_HORIZONTAL, ERASER, FLOPPY_DISK, GEAR, NOTE_PENCIL, PENCIL, TAG,
+};
+use metadata::MetaDataFrame;
 use serde::{Deserialize, Serialize};
+use std::fmt::Write;
 use tracing::error;
+
+const ID_SOURCE: &str = "Calculation";
 
 /// Calculation pane
 #[derive(Default, Deserialize, Serialize)]
 pub(crate) struct Pane {
-    pub(crate) data_frame: DataFrame,
-    pub(crate) control: Control,
+    pub(crate) frame: MetaDataFrame,
+    pub(crate) settings: Settings,
+    state: State,
 }
 
 impl Pane {
-    pub(crate) const fn new() -> Self {
+    pub(crate) const fn new(frame: MetaDataFrame) -> Self {
         Self {
-            data_frame: DataFrame::empty(),
-            control: Control::new(),
+            frame,
+            settings: Settings::new(),
+            state: State::new(),
         }
     }
 
-    pub(crate) fn init(data_frame: DataFrame, label: impl Into<String>) -> Self {
-        Self {
-            data_frame,
-            control: Control {
-                settings: Settings {
-                    label: label.into(),
-                    ..Default::default()
-                },
-                ..Default::default()
-            },
-        }
+    pub(crate) const fn icon() -> &'static str {
+        NOTE_PENCIL
     }
 
-    pub(crate) fn title(&self) -> &str {
-        if self.control.settings.label.is_empty() {
-            "HMF"
-        } else {
-            &self.control.settings.label
-        }
+    pub(crate) fn title(&self) -> String {
+        self.frame.meta.title()
     }
 
-    pub(crate) fn header(&mut self, ui: &mut Ui) {
-        ui.separator();
+    pub(crate) fn header(&mut self, ui: &mut Ui) -> Response {
         bar(ui, |ui| {
-            ScrollArea::horizontal().show(ui, |ui| {
-                ui.menu_button(RichText::new(TAG).heading(), |ui| {
-                    ui.horizontal(|ui| {
-                        TextEdit::singleline(&mut self.control.settings.label)
-                            .hint_text("File name")
-                            .ui(ui);
-                    });
+            ScrollArea::horizontal()
+                .show(ui, |ui| {
+                    ui.visuals_mut().button_frame = false;
+                    self.header_content(ui)
                 })
-                .response
-                .on_hover_text(localize!("label"));
-                ui.toggle_value(
-                    &mut self.control.settings.resizable,
-                    RichText::new(ARROWS_HORIZONTAL).heading(),
-                )
-                .on_hover_text(localize!("resize"));
-                ui.toggle_value(
-                    &mut self.control.settings.editable,
-                    RichText::new(PENCIL).heading(),
-                )
-                .on_hover_text(localize!("edit"));
-                ui.separator();
-                // Add
-                if ui
-                    .button(RichText::new(PLUS).heading())
-                    .on_hover_text(localize!("add"))
-                    .clicked()
-                {
-                    if let Err(error) = self.add_row() {
-                        error!(%error);
-                    }
-                }
-                // Clear
-                ui.add_enabled_ui(!self.data_frame.is_empty(), |ui| {
-                    if ui
-                        .button(RichText::new(TRASH).heading())
-                        .on_hover_text(localize!("clear"))
-                        .clicked()
-                    {
-                        self.data_frame = DataFrame::empty();
-                    }
-                });
-                ui.separator();
-                ui.toggle_value(&mut self.control.open, RichText::new(GEAR).heading())
-                    .on_hover_text(localize!("settings"));
-                ui.separator();
-                if ui
-                    .button(RichText::new(FLOPPY_DISK).heading())
-                    .on_hover_text(localize!("save"))
-                    .on_hover_text(&self.control.settings.label)
-                    .clicked()
-                {
-                    if let Err(error) = self.save() {
-                        error!(%error);
-                    }
-                }
-            });
-        });
+                .inner
+        })
+        .inner
     }
 
-    pub(crate) fn content(&mut self, ui: &mut Ui) {
+    fn header_content(&mut self, ui: &mut Ui) -> Response {
+        let mut response = ui
+            .heading(Self::icon())
+            .on_hover_text(localize!("configuration"));
+        response |= ui.heading(self.title());
+        response = response
+            .on_hover_text(format!("{:x}", self.hash()))
+            .on_hover_cursor(CursorIcon::Grab);
         ui.separator();
-        self.control.windows(ui);
-        if let Some(Event::DeleteRow(row)) =
-            TableView::new(&mut self.data_frame, &self.control.settings).ui(ui)
+        // Reset
+        if ui
+            .button(RichText::new(ARROWS_CLOCKWISE).heading())
+            .clicked()
         {
-            if let Err(error) = self.delete_row(row) {
+            self.state.reset_table_state = true;
+        }
+        // Resize
+        ui.toggle_value(
+            &mut self.settings.resizable,
+            RichText::new(ARROWS_HORIZONTAL).heading(),
+        )
+        .on_hover_text(localize!("resize"));
+        // Edit
+        ui.toggle_value(&mut self.settings.editable, RichText::new(PENCIL).heading())
+            .on_hover_text(localize!("edit"));
+        ui.separator();
+        // Clear
+        ui.add_enabled_ui(
+            self.settings.editable && self.frame.data.height() > 0,
+            |ui| {
+                if ui
+                    .button(RichText::new(ERASER).heading())
+                    .on_hover_text(localize!("clear"))
+                    .clicked()
+                {
+                    self.frame.data = self.frame.data.clear();
+                }
+            },
+        );
+        ui.separator();
+        // Settings
+        ui.toggle_value(
+            &mut self.state.open_settings_window,
+            RichText::new(GEAR).heading(),
+        )
+        .on_hover_text(localize!("settings"));
+        ui.separator();
+        if ui
+            .button(RichText::new(FLOPPY_DISK).heading())
+            .on_hover_text(localize!("save"))
+            .on_hover_text(&self.settings.label)
+            .clicked()
+        {
+            if let Err(error) = self.save() {
                 error!(%error);
             }
         }
+        response
+    }
+
+    pub(crate) fn body(&mut self, ui: &mut Ui) {
+        self.windows(ui);
+        if self.settings.editable {
+            self.body_content_meta(ui);
+        }
+        self.body_content_data(ui);
+    }
+
+    fn body_content_meta(&mut self, ui: &mut Ui) {
+        ui.style_mut().visuals.collapsing_header_frame = true;
+        ui.collapsing(RichText::new(format!("{TAG} Metadata")).heading(), |ui| {
+            self.frame.meta.show(ui);
+        });
+    }
+
+    fn body_content_data(&mut self, ui: &mut Ui) {
+        TableView::new(&mut self.frame.data, &self.settings, &mut self.state).show(ui);
     }
 
     pub(super) fn hash(&self) -> u64 {
-        // hash(&self.data_frame)
-        0
+        hash(&self.frame)
     }
 
-    pub(crate) fn add_row(&mut self) -> PolarsResult<()> {
-        self.data_frame = concat(
-            [
-                self.data_frame.clone().lazy(),
-                df! {
-                    "FattyAcid" => df! {
-                        "Carbons" => &[0u8],
-                        "Unsaturated" => &[
-                            df! {
-                                "Index" => Series::new_empty(PlSmallStr::EMPTY, &DataType::UInt8),
-                                "Isomerism" => Series::new_empty(PlSmallStr::EMPTY, &DataType::Int8),
-                                "Unsaturation" => Series::new_empty(PlSmallStr::EMPTY, &DataType::UInt8),
-                            }?.into_struct(PlSmallStr::EMPTY).into_series(),
-                        ],
-                    }?.into_struct(PlSmallStr::EMPTY),
-                    "TAG" => [0f64],
-                    "MAG" => [0f64],
-                }?
-                .lazy(),
-            ],
-            UnionArgs {
-                rechunk: true,
-                diagonal: true,
-                ..Default::default()
-            },
-        )?
-        .collect()?;
+    fn save(&mut self) -> Result<()> {
+        let mut name = self.frame.meta.name.replace(" ", "_");
+        if let Some(version) = &self.frame.meta.version {
+            write!(name, ".{version}")?;
+        }
+        name.push_str(".hmf.ipc");
+        save(&name, &mut self.frame)?;
         Ok(())
     }
 
-    // https://stackoverflow.com/questions/71486019/how-to-drop-row-in-polars-python
-    // https://stackoverflow.com/a/71495211/1522758
-    pub(crate) fn delete_row(&mut self, row: usize) -> PolarsResult<()> {
-        self.data_frame = self
-            .data_frame
-            .slice(0, row)
-            .vstack(&self.data_frame.slice((row + 1) as _, usize::MAX))?;
-        self.data_frame.as_single_chunk_par();
-        Ok(())
+    pub(crate) fn windows(&mut self, ui: &mut Ui) {
+        Window::new(format!("{GEAR} Settings"))
+            .id(ui.auto_id_with(ID_SOURCE))
+            .open(&mut self.state.open_settings_window)
+            .show(ui.ctx(), |ui| self.settings.show(ui));
     }
 
-    fn save(&self) -> Result<()> {
-        let contents = ron::ser::to_string_pretty(
-            &self.data_frame,
-            PrettyConfig::new().extensions(Extensions::IMPLICIT_SOME | Extensions::UNWRAP_NEWTYPES),
-        )?;
-        std::fs::write(format!("{}.hmf.ron", self.control.settings.label), contents)?;
-        Ok(())
-    }
+    // fn save(&self) -> Result<()> {
+    //     let contents = ron::ser::to_string_pretty(
+    //         &self.frame.data,
+    //         PrettyConfig::new().extensions(Extensions::IMPLICIT_SOME | Extensions::UNWRAP_NEWTYPES),
+    //     )?;
+    //     std::fs::write(format!("{}.hmf.ron", self.settings.label), contents)?;
+    //     Ok(())
+    // }
 }
 
-pub(crate) mod control;
+pub(crate) mod settings;
 
+mod state;
 mod table;

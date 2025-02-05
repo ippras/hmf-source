@@ -1,4 +1,4 @@
-use crate::presets::MATURE_MILK;
+use crate::presets::MATURE_MILK_FAT;
 use egui::{ComboBox, InnerResponse, Ui};
 use lipid::fatty_acid::{
     FattyAcid,
@@ -47,7 +47,7 @@ impl<'a> FattyAcidWidget<'a> {
                 .width(ui.available_width())
                 .selected_text(text)
                 .show_ui(ui, |ui| -> PolarsResult<()> {
-                    let mature_milk = MATURE_MILK.fatty_acid();
+                    let mature_milk = MATURE_MILK_FAT.data.fatty_acid();
                     for index in 0..mature_milk.len() {
                         if let Some(selected_value) = mature_milk.get(index)? {
                             let text = format!("{:#}", (&selected_value).display(COMMON));

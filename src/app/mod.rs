@@ -1,21 +1,19 @@
 use self::{
+    menu::load::Load,
     panes::{Pane, behavior::Behavior},
     windows::About,
 };
 use crate::{
     localization::{UiExt, localize},
-    presets::{
-        C70_CONTROL, C70_H2O2, C70_NACL, CP_9, CV_15, CV_395, CZ_30412, HMF_1, HMF_2, HMF_3, HMF_4,
-        ISO_FJ,
-    },
+    presets::*,
 };
 use eframe::{APP_KEY, CreationContext, Storage, get_value, set_value};
 use egui::{
-    Align, Align2, CentralPanel, Color32, Context, FontDefinitions, Id, LayerId, Layout, Order,
-    RichText, ScrollArea, Sides, TextStyle, TopBottomPanel, Vec2, Visuals, menu::bar, vec2,
-    warn_if_debug_build,
+    Align, Align2, CentralPanel, Color32, Context, FontDefinitions, Frame, Id, LayerId, Layout,
+    Order, RichText, ScrollArea, Separator, Sides, TextStyle, TopBottomPanel, Ui, Vec2, Visuals,
+    menu::bar, vec2, warn_if_debug_build,
 };
-use egui_ext::{DroppedFileExt, HoveredFileExt, LightDarkButton};
+use egui_ext::{DroppedFileExt, HoveredFileExt, LabeledSeparator, LightDarkButton};
 use egui_notify::Toasts;
 use egui_phosphor::{
     Variant, add_to_fonts,
@@ -40,7 +38,7 @@ use tracing::{error, info, trace};
 /// IEEE 754-2008
 const MAX_PRECISION: usize = 16;
 
-pub(super) const SIZE: f32 = 32.0;
+pub(super) const ICON_SIZE: f32 = 32.0;
 const MARGIN: Vec2 = vec2(4.0, 0.0);
 const NOTIFICATIONS_DURATION: Duration = Duration::from_secs(15);
 
@@ -146,7 +144,7 @@ impl App {
     // Central panel
     fn central_panel(&mut self, ctx: &Context) {
         CentralPanel::default()
-            .frame(egui::Frame::central_panel(&ctx.style()).inner_margin(0.0))
+            .frame(Frame::central_panel(&ctx.style()))
             .show(ctx, |ui| {
                 let mut behavior = Behavior { close: None };
                 self.tree.ui(&mut behavior, ui);
@@ -162,11 +160,11 @@ impl App {
             bar(ui, |ui| {
                 ScrollArea::horizontal().show(ui, |ui| {
                     // Light/Dark
-                    ui.light_dark_button(SIZE);
+                    ui.light_dark_button(ICON_SIZE);
                     ui.separator();
                     // Reset
                     if ui
-                        .button(RichText::new(TRASH).size(SIZE))
+                        .button(RichText::new(TRASH).size(ICON_SIZE))
                         .on_hover_text(localize!("reset_application"))
                         .clicked()
                     {
@@ -175,7 +173,7 @@ impl App {
                     }
                     ui.separator();
                     if ui
-                        .button(RichText::new(ARROWS_CLOCKWISE).size(SIZE))
+                        .button(RichText::new(ARROWS_CLOCKWISE).size(ICON_SIZE))
                         .on_hover_text(localize!("reset_gui"))
                         .clicked()
                     {
@@ -186,7 +184,7 @@ impl App {
                     }
                     ui.separator();
                     if ui
-                        .button(RichText::new(SQUARE_SPLIT_VERTICAL).size(SIZE))
+                        .button(RichText::new(SQUARE_SPLIT_VERTICAL).size(ICON_SIZE))
                         .on_hover_text(localize!("vertical"))
                         .clicked()
                     {
@@ -197,7 +195,7 @@ impl App {
                         }
                     }
                     if ui
-                        .button(RichText::new(SQUARE_SPLIT_HORIZONTAL).size(SIZE))
+                        .button(RichText::new(SQUARE_SPLIT_HORIZONTAL).size(ICON_SIZE))
                         .on_hover_text(localize!("horizontal"))
                         .clicked()
                     {
@@ -208,7 +206,7 @@ impl App {
                         }
                     }
                     if ui
-                        .button(RichText::new(GRID_FOUR).size(SIZE))
+                        .button(RichText::new(GRID_FOUR).size(ICON_SIZE))
                         .on_hover_text(localize!("grid"))
                         .clicked()
                     {
@@ -219,7 +217,7 @@ impl App {
                         }
                     }
                     if ui
-                        .button(RichText::new(TABS).size(SIZE))
+                        .button(RichText::new(TABS).size(ICON_SIZE))
                         .on_hover_text(localize!("tabs"))
                         .clicked()
                     {
@@ -233,148 +231,46 @@ impl App {
                     // Resizable
                     let mut resizable = true;
                     if ui
-                        .button(RichText::new(ARROWS_HORIZONTAL).size(SIZE))
+                        .button(RichText::new(ARROWS_HORIZONTAL).size(ICON_SIZE))
                         .on_hover_text(localize!("resize"))
                         .clicked()
                     {
                         let mut panes = self.tree.tiles.panes_mut().peekable();
                         if let Some(pane) = panes.peek() {
-                            resizable ^= pane.control.settings.resizable;
+                            resizable ^= pane.settings.resizable;
                         }
                         for pane in panes {
-                            pane.control.settings.resizable = resizable;
+                            pane.settings.resizable = resizable;
                         }
                     };
                     // Editable
                     let mut editable = true;
                     if ui
-                        .button(RichText::new(PENCIL).size(SIZE))
+                        .button(RichText::new(PENCIL).size(ICON_SIZE))
                         .on_hover_text(localize!("edit"))
                         .clicked()
                     {
                         let mut panes = self.tree.tiles.panes_mut().peekable();
                         if let Some(pane) = panes.peek() {
-                            editable ^= pane.control.settings.editable;
+                            editable ^= pane.settings.editable;
                         }
                         for pane in panes {
-                            pane.control.settings.editable = editable;
+                            pane.settings.editable = editable;
                         }
                     };
                     ui.separator();
                     // Load
-                    ui.menu_button(RichText::new(DATABASE).size(SIZE), |ui| {
-                        if ui
-                            .button(RichText::new(format!("{DATABASE} HMF-1")).heading())
-                            .clicked()
-                        {
-                            self.tree
-                                .insert_pane::<VERTICAL>(Pane::init(HMF_1.clone(), "HMF-1"));
-                            ui.close_menu();
-                        }
-                        if ui
-                            .button(RichText::new(format!("{DATABASE} HMF-2")).heading())
-                            .clicked()
-                        {
-                            self.tree
-                                .insert_pane::<VERTICAL>(Pane::init(HMF_2.clone(), "HMF-2"));
-                            ui.close_menu();
-                        }
-                        if ui
-                            .button(RichText::new(format!("{DATABASE} HMF-3")).heading())
-                            .clicked()
-                        {
-                            self.tree
-                                .insert_pane::<VERTICAL>(Pane::init(HMF_3.clone(), "HMF-3"));
-                            ui.close_menu();
-                        }
-                        if ui
-                            .button(RichText::new(format!("{DATABASE} HMF-4")).heading())
-                            .clicked()
-                        {
-                            self.tree
-                                .insert_pane::<VERTICAL>(Pane::init(HMF_4.clone(), "HMF-4"));
-                            ui.close_menu();
-                        }
-                        ui.separator();
-                        if ui
-                            .button(RichText::new(format!("{DATABASE} CV-15")).heading())
-                            .clicked()
-                        {
-                            self.tree
-                                .insert_pane::<VERTICAL>(Pane::init(CV_15.clone(), "CV-15"));
-                            ui.close_menu();
-                        }
-                        if ui
-                            .button(RichText::new(format!("{DATABASE} CZ-30412")).heading())
-                            .clicked()
-                        {
-                            self.tree
-                                .insert_pane::<VERTICAL>(Pane::init(CZ_30412.clone(), "CZ-30412"));
-                            ui.close_menu();
-                        }
-                        if ui
-                            .button(RichText::new(format!("{DATABASE} CP-9")).heading())
-                            .clicked()
-                        {
-                            self.tree
-                                .insert_pane::<VERTICAL>(Pane::init(CP_9.clone(), "CP-9"));
-                            ui.close_menu();
-                        }
-                        if ui
-                            .button(RichText::new(format!("{DATABASE} CV-395")).heading())
-                            .clicked()
-                        {
-                            self.tree
-                                .insert_pane::<VERTICAL>(Pane::init(CV_395.clone(), "CV-395"));
-                            ui.close_menu();
-                        }
-                        //
-                        if ui
-                            .button(RichText::new(format!("{DATABASE} ISO-FJ")).heading())
-                            .clicked()
-                        {
-                            self.tree
-                                .insert_pane::<VERTICAL>(Pane::init(ISO_FJ.clone(), "ISO-FJ"));
-                            ui.close_menu();
-                        }
-                        ui.separator();
-                        if ui
-                            .button(RichText::new(format!("{DATABASE} C70-Control")).heading())
-                            .clicked()
-                        {
-                            self.tree.insert_pane::<VERTICAL>(Pane::init(
-                                C70_CONTROL.clone(),
-                                "C70-Control",
-                            ));
-                            ui.close_menu();
-                        }
-                        if ui
-                            .button(RichText::new(format!("{DATABASE} C70-H2O2")).heading())
-                            .clicked()
-                        {
-                            self.tree
-                                .insert_pane::<VERTICAL>(Pane::init(C70_H2O2.clone(), "C70-H2O2"));
-                            ui.close_menu();
-                        }
-                        if ui
-                            .button(RichText::new(format!("{DATABASE} C70-NaCl")).heading())
-                            .clicked()
-                        {
-                            self.tree
-                                .insert_pane::<VERTICAL>(Pane::init(C70_NACL.clone(), "C70-NaCl"));
-                            ui.close_menu();
-                        }
-                    });
+                    ui.add(Load::new(&mut self.tree));
                     // Create
-                    if ui.button(RichText::new(PLUS).size(SIZE)).clicked() {
-                        self.tree.insert_pane::<VERTICAL>(Pane::new());
+                    if ui.button(RichText::new(PLUS).size(ICON_SIZE)).clicked() {
+                        // self.tree.insert_pane::<VERTICAL>(Pane::new());
                     }
                     ui.separator();
                     // About
                     ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                         // About
                         if ui
-                            .button(RichText::new(INFO).size(SIZE))
+                            .button(RichText::new(INFO).size(ICON_SIZE))
                             .on_hover_text("About window")
                             .clicked()
                         {
@@ -460,20 +356,6 @@ impl App {
                     ))
                     .ok();
             }
-        }
-    }
-
-    fn parse(&mut self, _ctx: &Context) {
-        for (name, content) in self.channel.1.try_iter() {
-            trace!(name, content);
-            match ron::de::from_str(&content) {
-                Ok(data_frame) => {
-                    trace!(?data_frame);
-                    self.tree
-                        .insert_pane::<VERTICAL>(Pane::init(data_frame, name));
-                }
-                Err(error) => error!(%error),
-            };
         }
     }
 
@@ -572,11 +454,11 @@ impl eframe::App for App {
         self.notifications(ctx);
         // Post update
         self.drag_and_drop(ctx);
-        self.parse(ctx);
     }
 }
 
 mod computers;
+mod menu;
 mod panes;
 mod widgets;
 mod windows;

@@ -1,4 +1,4 @@
-use crate::{app::panes::calculation::control::Settings, presets::MATURE_MILK};
+use crate::{app::panes::calculation::settings::Settings, presets::MATURE_MILK_FAT};
 use egui::util::cache::{ComputerMut, FrameCache};
 use lipid::fatty_acid::polars::{ExprExt as _, FindByName};
 use polars::prelude::*;
