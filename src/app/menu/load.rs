@@ -41,8 +41,10 @@ impl Load<'_> {
         // <https://doi.org/10.1021/jf903048p>
         ui.add(doi_separator("10.1021/jf903048p"));
         ui.label(RichText::new("Yong-Hua Wang (2009)").small());
-        preset!(_10_1021_jf903048p::CMF);
-        preset!(_10_1021_jf903048p::MMF);
+        preset!(_10_1021_jf903048p::CMF_AF);
+        preset!(_10_1021_jf903048p::CMF_AP);
+        preset!(_10_1021_jf903048p::CMF_R);
+        preset!(_10_1021_jf903048p::MMF_A);
         // <https://doi.org/10.1016/j.algal.2018.11.004>
         ui.add(doi_separator("10.1016/j.algal.2018.11.004"));
         ui.label(RichText::new("Yongjin He (2019)").small());

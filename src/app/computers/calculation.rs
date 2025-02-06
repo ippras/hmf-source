@@ -105,12 +105,18 @@ impl Computer {
 /// * Value
 /// * Median + Reference range
 fn abcdef(settings: &Settings) -> impl Fn(&Series) -> PolarsResult<Series> + 'static {
-    let round_exponent = settings.round as i32;
+    let settings = settings.clone();
     move |series| {
         let fields = series.struct_()?.fields_as_series();
         let b = &fields[0];
-        let d = fields[1].struct_()?.field_by_name("Median")?;
-        let reference_range = fields[1].struct_()?.field_by_name("ReferenceRange")?;
+        let r#struct = match fields[1].name().as_str() {
+            "Target123" => &fields[1],
+            "Target2" if settings.relative => &fields[1].struct_()?.field_by_name("Relative")?,
+            "Target2" => &fields[1].struct_()?.field_by_name("Absolute")?,
+            _ => unreachable!(),
+        };
+        let d = r#struct.struct_()?.field_by_name("Median")?;
+        let reference_range = r#struct.struct_()?.field_by_name("ReferenceRange")?;
         let min = reference_range.struct_()?.field_by_name("Min")?;
         let max = reference_range.struct_()?.field_by_name("Max")?;
         let sum = d.f64()?.sum();
@@ -132,8 +138,9 @@ fn abcdef(settings: &Settings) -> impl Fn(&Series) -> PolarsResult<Series> + 'st
             builder.b.append_value(b);
             // C
             let mut c = if a != 0.0 { (b - a).abs() / a } else { 0.0 };
-            if round_exponent > 0 {
-                c = (c * 10f64.powi(round_exponent)).round() / 10f64.powi(round_exponent);
+            if settings.round > 0 {
+                let order = 10f64.powi(settings.round as _);
+                c = (c * order).round() / order;
             }
             builder.c.append_value(c);
             builder.d.append_value(d);

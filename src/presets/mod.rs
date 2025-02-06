@@ -47,9 +47,10 @@ pub(crate) mod _10_1021_jf903048p {
     pub(crate) static MATURE_MILK_FAT: LazyLock<MetaDataFrame> =
         preset!("10.1021/jf903048p/MatureMilkFat.ipc");
 
-    pub(crate) static CMF: LazyLock<MetaDataFrame> = preset!("10.1021/jf903048p/CMF.hmf.ipc");
-    pub(crate) static MMF: LazyLock<MetaDataFrame> = preset!("10.1021/jf903048p/MMF.hmf.ipc");
-    // pub(crate) static RCMF: LazyLock<MetaDataFrame> = preset!("10.1021/jf903048p/RCMF.hmf.ipc");
+    pub(crate) static CMF_AF: LazyLock<MetaDataFrame> = preset!("10.1021/jf903048p/CMF-AF.hmf.ipc");
+    pub(crate) static CMF_AP: LazyLock<MetaDataFrame> = preset!("10.1021/jf903048p/CMF-AP.hmf.ipc");
+    pub(crate) static CMF_R: LazyLock<MetaDataFrame> = preset!("10.1021/jf903048p/CMF-R.hmf.ipc");
+    pub(crate) static MMF_A: LazyLock<MetaDataFrame> = preset!("10.1021/jf903048p/MMF-A.hmf.ipc");
 }
 
 /// <https://doi.org/10.1038/sj.ejcn.1601470>
